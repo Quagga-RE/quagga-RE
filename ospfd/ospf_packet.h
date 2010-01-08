@@ -162,7 +162,6 @@ extern int ospf_ls_upd_timer (struct thread *);
 extern int ospf_ls_ack_timer (struct thread *);
 extern int ospf_poll_timer (struct thread *);
 extern int ospf_hello_reply_timer (struct thread *);
-extern void ospf_hello_send_sub (struct ospf_interface *, struct in_addr *);
 
 extern const struct message ospf_packet_type_str[];
 extern const size_t ospf_packet_type_str_max;
