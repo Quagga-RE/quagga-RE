@@ -7138,7 +7138,7 @@ DEFUN (ospf_max_metric_router_lsa_admin,
       SET_FLAG (area->stub_router_state, OSPF_AREA_ADMIN_STUB_ROUTED);
       
       if (!CHECK_FLAG (area->stub_router_state, OSPF_AREA_IS_STUB_ROUTED))
-          ospf_router_lsa_timer_add (area);
+          ospf_router_lsa_update_area (area);
     }
   return CMD_SUCCESS;
 }
@@ -7164,7 +7164,7 @@ DEFUN (no_ospf_max_metric_router_lsa_admin,
           && !area->t_stub_router)
         {
           UNSET_FLAG (area->stub_router_state, OSPF_AREA_IS_STUB_ROUTED);
-          ospf_router_lsa_timer_add (area);
+          ospf_router_lsa_update_area (area);
         }
     }
   return CMD_SUCCESS;
@@ -7217,7 +7217,7 @@ DEFUN (no_ospf_max_metric_router_lsa_startup,
       if (!CHECK_FLAG (area->stub_router_state, OSPF_AREA_ADMIN_STUB_ROUTED))
         {
           UNSET_FLAG (area->stub_router_state, OSPF_AREA_IS_STUB_ROUTED);
-          ospf_router_lsa_timer_add (area);
+          ospf_router_lsa_update_area (area);
         }
     }
   return CMD_SUCCESS;
