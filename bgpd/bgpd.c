@@ -2044,17 +2044,17 @@ bgp_get (struct bgp **bgp_val, as_t *as, const char *name)
 	}
     }
 
+  bgp = bgp_create (as, name);
+  listnode_add (bm->bgp, bgp);
+  bgp_router_id_set(bgp, &router_id_zebra);
+  *bgp_val = bgp;
+
   /* Create BGP server socket, if first instance.  */
   if (list_isempty(bm->bgp))
     {
       if (bgp_socket (bm->port, bm->address) < 0)
 	return BGP_ERR_INVALID_VALUE;
     }
-
-  bgp = bgp_create (as, name);
-  listnode_add (bm->bgp, bgp);
-  bgp_router_id_set(bgp, &router_id_zebra);
-  *bgp_val = bgp;
 
   return 0;
 }
