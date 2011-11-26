@@ -741,6 +741,8 @@ zread_ipv4_add (struct zserv *client, u_short length)
   struct stream *s;
   unsigned int ifindex;
   u_char ifname_len;
+  safi_t safi;	
+
 
   /* Get input stream.  */
   s = client->ibuf;
@@ -752,6 +754,7 @@ zread_ipv4_add (struct zserv *client, u_short length)
   rib->type = stream_getc (s);
   rib->flags = stream_getc (s);
   message = stream_getc (s); 
+  safi = stream_getw (s);
   rib->uptime = time (NULL);
 
   /* IPv4 prefix. */
@@ -803,7 +806,7 @@ zread_ipv4_add (struct zserv *client, u_short length)
     
   /* Table */
   rib->table=zebrad.rtm_table_default;
-  rib_add_ipv4_multipath (&p, rib);
+  rib_add_ipv4_multipath (&p, rib, safi);
   return 0;
 }
 
@@ -829,6 +832,7 @@ zread_ipv4_delete (struct zserv *client, u_short length)
   api.type = stream_getc (s);
   api.flags = stream_getc (s);
   api.message = stream_getc (s);
+  api.safi = stream_getw (s);
 
   /* IPv4 prefix. */
   memset (&p, 0, sizeof (struct prefix_ipv4));
@@ -877,7 +881,7 @@ zread_ipv4_delete (struct zserv *client, u_short length)
     api.metric = 0;
     
   rib_delete_ipv4 (api.type, api.flags, &p, &nexthop, ifindex,
-		   client->rtm_table);
+		   client->rtm_table, api.safi);
   return 0;
 }
 
