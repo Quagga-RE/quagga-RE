@@ -105,7 +105,7 @@ struct prefix_rd
 #define IPV4_MAX_BYTELEN    4
 #define IPV4_MAX_BITLEN    32
 #define IPV4_MAX_PREFIXLEN 32
-#define IPV4_ADDR_CMP(D,S)   (*((u_int32_t *)(D)) -  *((u_int32_t *)(S)))
+#define IPV4_ADDR_CMP(D,S)   ((int32_t) (*((u_int32_t *)(D)) -  *((u_int32_t *)(S))))
 #define IPV4_ADDR_SAME(D,S)  (*((u_int32_t *)(D)) == *((u_int32_t *)(S)))
 #define IPV4_ADDR_COPY(D,S)   *((u_int32_t *)(D)) =  *((u_int32_t *)(S))
 
