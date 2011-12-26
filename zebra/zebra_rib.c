@@ -1889,8 +1889,10 @@ rib_delete_ipv4 (int type, int flags, struct prefix_ipv4 *p,
       if (rib->type != type)
 	continue;
       if (rib->type == ZEBRA_ROUTE_CONNECT && (nexthop = rib->nexthop) &&
-	  nexthop->type == NEXTHOP_TYPE_IFINDEX && nexthop->ifindex == ifindex)
+	  nexthop->type == NEXTHOP_TYPE_IFINDEX)
 	{
+	  if (nexthop->ifindex != ifindex)
+	    continue;
 	  if (rib->refcnt)
 	    {
 	      rib->refcnt--;
@@ -2437,8 +2439,10 @@ rib_delete_ipv6 (int type, int flags, struct prefix_ipv6 *p,
       if (rib->type != type)
         continue;
       if (rib->type == ZEBRA_ROUTE_CONNECT && (nexthop = rib->nexthop) &&
-	  nexthop->type == NEXTHOP_TYPE_IFINDEX && nexthop->ifindex == ifindex)
+	  nexthop->type == NEXTHOP_TYPE_IFINDEX)
 	{
+	  if (nexthop->ifindex != ifindex)
+	    continue;
 	  if (rib->refcnt)
 	    {
 	      rib->refcnt--;
