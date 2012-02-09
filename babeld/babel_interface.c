@@ -899,9 +899,9 @@ show_babel_interface_sub (struct vty *vty, struct interface *ifp)
   vty_out (vty, "%s is %s%s", ifp->name,
     ((is_up = if_is_operative(ifp)) ? "up" : "down"), VTY_NEWLINE);
   vty_out (vty, "  ifindex %u, MTU %u bytes %s%s",
-    ifp->ifindex, ifp->mtu, if_flag_dump(ifp->flags), VTY_NEWLINE);
+    ifp->ifindex, MIN(ifp->mtu, ifp->mtu6), if_flag_dump(ifp->flags), VTY_NEWLINE);
 
-  if (babel_enable_if_lookup (ifp->name) < 0)
+  if (!IS_ENABLE(ifp))
   {
     vty_out (vty, "  Babel protocol is not enabled on this interface%s", VTY_NEWLINE);
     return;
