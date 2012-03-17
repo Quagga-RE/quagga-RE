@@ -5258,7 +5258,7 @@ bgp_redistribute_add (struct prefix *p, const struct in_addr *nexthop,
   int ret;
 
   /* Make default attribute. */
-  bgp_attr_default_set (&attr, BGP_ORIGIN_INCOMPLETE);
+  bgp_attr_default_set (&attr, BGP_ORIGIN_IGP);
   if (nexthop)
     attr.nexthop = *nexthop;
 
