@@ -1557,23 +1557,30 @@ static int
 ospf_lsa_netmasks_examin (struct lsa_header *lsah)
 {
   struct router_lsa *rlsa;
+  struct router_lsa_link *link;
   struct network_lsa *nlsa;
   struct summary_lsa *slsa;
   struct as_external_lsa *aselsa;
-  u_int16_t i, num_links;
+  u_int16_t num_links;
 
   switch (lsah->type)
   {
   case OSPF_ROUTER_LSA:
     rlsa = (struct router_lsa *) lsah;
     num_links = ntohs (rlsa->links);
-    for (i = 0; i < num_links; i++)
+    link = rlsa->link;
+    while (num_links)
+    {
       if
       (
-        rlsa->link[i].m[0].type == LSA_LINK_TYPE_STUB &&
-        ip_masklen_safe (rlsa->link[i].link_data) < 0
+        link->m[0].type == LSA_LINK_TYPE_STUB &&
+        ip_masklen_safe (link->link_data) < 0
       )
         return MSG_NG;
+      num_links--;
+      link = (struct router_lsa_link *)((caddr_t) link + OSPF_ROUTER_LSA_LINK_SIZE +
+             OSPF_ROUTER_LSA_TOS_SIZE * link->m[0].tos_count);
+    }
     break;
   case OSPF_NETWORK_LSA:
     nlsa = (struct network_lsa *) lsah;
@@ -2429,7 +2436,7 @@ ospf_router_lsa_links_examin
       return MSG_NG;
     }
     /* OK, "# TOS" is within packet bytes. */
-    thislinklen = OSPF_ROUTER_LSA_LINK_SIZE + 4 * link->m[0].tos_count;
+    thislinklen = OSPF_ROUTER_LSA_LINK_SIZE + OSPF_ROUTER_LSA_TOS_SIZE * link->m[0].tos_count;
     if (thislinklen > linkbytes)
     {
       if (IS_DEBUG_OSPF_PACKET (0, RECV))
