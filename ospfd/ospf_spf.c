@@ -319,18 +319,20 @@ ospf_lsa_has_link (struct lsa_header *w, struct lsa_header *v)
   if (w->type == OSPF_ROUTER_LSA)
     {
       rl = (struct router_lsa *) w;
-      length = ntohs (rl->links);
-      struct router_lsa_link *link = rl->link;
 
-      for (i = 0; i < length; i++)
+      length = ntohs (w->length);
+
+      for (i = 0;
+           i < ntohs (rl->links) && length >= sizeof (struct router_lsa);
+           i++, length -= 12)
         {
-          switch (link->m[0].type)
+          switch (rl->link[i].m[0].type)
             {
             case LSA_LINK_TYPE_POINTOPOINT:
             case LSA_LINK_TYPE_VIRTUALLINK:
               /* Router LSA ID. */
               if (v->type == OSPF_ROUTER_LSA &&
-                  IPV4_ADDR_SAME (&link->link_id, &v->id))
+                  IPV4_ADDR_SAME (&rl->link[i].link_id, &v->id))
                 {
                   return i;
                 }
@@ -338,7 +340,7 @@ ospf_lsa_has_link (struct lsa_header *w, struct lsa_header *v)
             case LSA_LINK_TYPE_TRANSIT:
               /* Network LSA ID. */
               if (v->type == OSPF_NETWORK_LSA &&
-                  IPV4_ADDR_SAME (&link->link_id, &v->id))
+                  IPV4_ADDR_SAME (&rl->link[i].link_id, &v->id))
                 {
                   return i;
                 }
@@ -349,8 +351,6 @@ ospf_lsa_has_link (struct lsa_header *w, struct lsa_header *v)
             default:
               break;
             }
-          link = (struct router_lsa_link *)((caddr_t) link + OSPF_ROUTER_LSA_LINK_SIZE +
-                 OSPF_ROUTER_LSA_TOS_SIZE * link->m[0].tos_count);
         }
     }
   return -1;

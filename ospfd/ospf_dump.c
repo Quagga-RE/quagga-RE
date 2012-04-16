@@ -405,35 +405,26 @@ ospf_router_lsa_dump (struct stream *s, u_int16_t length)
 {
   char buf[BUFSIZ];
   struct router_lsa *rl;
-  struct router_lsa_link *link;
-  size_t len;
-  u_int16_t num_links;
+  int i, len;
 
   rl = (struct router_lsa *) STREAM_PNT (s);
-  num_links = ntohs (rl->links);
-  link = rl->link;
 
   zlog_debug ("  Router-LSA");
   zlog_debug ("    flags %s", 
 	     ospf_router_lsa_flags_dump (rl->flags, buf, BUFSIZ));
-  zlog_debug ("    # links %u", num_links);
+  zlog_debug ("    # links %d", ntohs (rl->links));
 
   len = ntohs (rl->header.length) - OSPF_LSA_HEADER_SIZE - 4;
-  while (num_links && len)
+  for (i = 0; len > 0; i++)
     {
-      size_t thislinklen = OSPF_ROUTER_LSA_LINK_SIZE + OSPF_ROUTER_LSA_TOS_SIZE * link->m[0].tos_count;
-      assert (thislinklen <= len);
-      zlog_debug ("    Link ID %s", inet_ntoa (link->link_id));
-      zlog_debug ("    Link Data %s", inet_ntoa (link->link_data));
-      zlog_debug ("    Type %u", link->m[0].type);
-      zlog_debug ("    # TOS %u", link->m[0].tos_count);
-      zlog_debug ("    metric %u", ntohs (link->m[0].metric));
+      zlog_debug ("    Link ID %s", inet_ntoa (rl->link[i].link_id));
+      zlog_debug ("    Link Data %s", inet_ntoa (rl->link[i].link_data));
+      zlog_debug ("    Type %u", rl->link[i].m[0].type);
+      zlog_debug ("    # TOS %u", rl->link[i].m[0].tos_count);
+      zlog_debug ("    metric %u", ntohs (rl->link[i].m[0].metric));
 
-      len -= thislinklen;
-      num_links--;
-      link = (struct router_lsa_link *)((caddr_t) link + thislinklen);
+      len -= 12;
     }
-  assert (num_links == 0 && len == 0);
 }
 
 static void

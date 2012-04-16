@@ -3618,28 +3618,23 @@ static void
 show_ip_ospf_database_router_links (struct vty *vty,
                                     struct router_lsa *rl)
 {
-  u_int8_t type;
-  u_int16_t num_links = ntohs (rl->links);
-  struct router_lsa_link *link = rl->link;
+  int len, i, type;
 
-  while (num_links)
+  len = ntohs (rl->header.length) - 4;
+  for (i = 0; i < ntohs (rl->links) && len > 0; len -= 12, i++)
     {
-      type = link->m[0].type;
+      type = rl->link[i].m[0].type;
 
       vty_out (vty, "    Link connected to: %s%s",
 	       LOOKUP (ospf_router_lsa_link_type_str, type), VTY_NEWLINE);
       vty_out (vty, "     (Link ID) %s: %s%s", LOOKUP (ospf_router_lsa_link_id_str, type),
-	       inet_ntoa (link->link_id), VTY_NEWLINE);
+	       inet_ntoa (rl->link[i].link_id), VTY_NEWLINE);
       vty_out (vty, "     (Link Data) %s: %s%s", LOOKUP (ospf_router_lsa_link_data_str, type),
-	       inet_ntoa (link->link_data), VTY_NEWLINE);
-      vty_out (vty, "      Number of TOS metrics: %u%s",
-	       link->m[0].tos_count, VTY_NEWLINE);
+	       inet_ntoa (rl->link[i].link_data), VTY_NEWLINE);
+      vty_out (vty, "      Number of TOS metrics: 0%s", VTY_NEWLINE);
       vty_out (vty, "       TOS 0 Metric: %d%s",
-	       ntohs (link->m[0].metric), VTY_NEWLINE);
+	       ntohs (rl->link[i].m[0].metric), VTY_NEWLINE);
       vty_out (vty, "%s", VTY_NEWLINE);
-      num_links--;
-      link = (struct router_lsa_link *)((caddr_t) link + OSPF_ROUTER_LSA_LINK_SIZE +
-	     OSPF_ROUTER_LSA_TOS_SIZE * link->m[0].tos_count);
     }
 }
 
