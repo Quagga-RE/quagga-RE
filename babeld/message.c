@@ -224,17 +224,6 @@ babel_packet_examin(const unsigned char *packet, int packetlen)
             debugf(BABEL_DEBUG_COMMON,"Undersized %u TLV", type);
             return 1;
         }
-        /* For fixed-size TLVs listed minimum is also the maximum. */
-        switch(type) {
-        case MESSAGE_ACK_REQ:
-        case MESSAGE_ACK:
-        case MESSAGE_HELLO:
-        case MESSAGE_ROUTER_ID:
-          if (len == tlv_min_length[type])
-            break;
-          debugf(BABEL_DEBUG_COMMON,"Oversized %u TLV", type);
-          return 1;
-        }
         i += len + 2;
     }
     return 0;
