@@ -17,7 +17,7 @@ except that this permission notice may be stated in a translation
 approved by Kunihiro Ishiguro.
 
  -->
-<!-- Created on June 3, 2012 by texi2html 1.82
+<!-- Created on June 13, 2012 by texi2html 1.82
 texi2html was written by: 
             Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -70,7 +70,7 @@ ul.toc {list-style: none}
 		     
 <p><a href="http://www.quagga.net">Quagga</a> is an advanced routing software package
 that provides a suite of TCP/IP based routing protocols.  This is the Manual
-for Quagga 0.99.17.9. <a href="http://www.quagga.net">Quagga</a> is a fork of 
+for Quagga 0.99.17.10. <a href="http://www.quagga.net">Quagga</a> is a fork of 
 <a href="http://www.zebra.org">GNU Zebra</a>.
 </p>
 <p>Copyright &copy; 1999-2005 Kunihiro Ishiguro, et al.
@@ -399,8 +399,8 @@ OpenBSD 2.5 and higher
 <dd><p><cite>Routing Information Protocol. C.L. Hedrick. Jun-01-1988.</cite>
 </p>
 </dd>
-<dt> RF2082</dt>
-<dd><p><cite>RIP-2 MD5 Authentication. F. Baker, R. Atkinson. January 1997.</cite>
+<dt> RFC4822</dt>
+<dd><p><cite>RIPv2 Cryptographic Authentication. R. Atkinson, M. Fanto. February 2007.</cite>
 </p>
 </dd>
 <dt> RFC2453</dt>
@@ -457,6 +457,10 @@ OpenBSD 2.5 and higher
 </dd>
 <dt> RFC3137</dt>
 <dd><p><cite>OSPF Stub Router Advertisement, A. Retana, L. Nguyen, R. White, A. Zinin, D. McPherson. June 2001</cite>
+</p>
+</dd>
+<dt> RFC6106</dt>
+<dd><p><cite>IPv6 Router Advertisement Options for DNS Configuration. J. Jeong et al. November 2010.</cite>
 </p></dd>
 </dl>
 
@@ -1610,7 +1614,7 @@ Trying 127.0.0.1...
 Connected to localhost.
 Escape character is '^]'.
 
-Hello, this is Quagga (version 0.99.17.9)
+Hello, this is Quagga (version 0.99.17.10)
 Copyright &copy; 1999-2005 Kunihiro Ishiguro, et al.
 
 User Access Verification
@@ -4860,11 +4864,70 @@ is 20000ms.
 </p></dd></dl>
 
 <dl>
+<dt><a name="index-babel-authentication-mode-authmode-key_002dchain-keychain"></a><u>Interface Command:</u> <b>babel authentication mode <var>authmode</var> key-chain <var>keychain</var></b></dt>
+<dt><a name="index-no-babel-authentication-mode-authmode-key_002dchain-keychain"></a><u>Interface Command:</u> <b>no babel authentication mode <var>authmode</var> key-chain <var>keychain</var></b></dt>
+<dd><p>Manage (add or remove) configured security associations (CSAs) for the current
+interface. There may be multiple CSAs configured for an interface.
+<var>keychain</var> stands for a name of a standard key chain. <var>authmode</var> stands
+for a HMAC algorithm based on one of the following hash functions of choice.
+A HMAC algorithm uses a secret key and a compound PC/TS number to produce one
+or more digests for each protocol packet.
+</p><ul>
+<li>
+<code>sha256/sha384/sha512</code>:
+SHA-256, SHA-384 and SHA-512 hash functions respectively, which belong to SHA-2
+family of hash functions and produce a digest 256-bit, 384-bit and 512-bit long
+respectively.
+</li><li>
+<code>rmd160</code>:
+RIPEMD-160 hash function, which produces a digest 160-bit long.
+</li><li>
+<code>whirlpool</code>:
+Whirlpool hash function, which produces a digest 512-bit long.
+</li></ul>
+<p>All of the hash functions listed above are considered relatively strong at the
+time of this writing and require Quagga to be built with gcrypt library.
+<a href="#The-Configure-script-and-its-options">The Configure script and its options</a>
+</p></dd></dl>
+
+<dl>
+<dt><a name="index-no-babel-authentication"></a><u>Interface Command:</u> <b>no babel authentication</b></dt>
+<dd><p>Remove all configured security associations (CSAs) from the current interface.
+</p></dd></dl>
+
+<dl>
 <dt><a name="index-babel-resend_002ddelay-_003c20_002d655340_003e"></a><u>Babel Command:</u> <b>babel resend-delay &lt;20-655340&gt;</b></dt>
 <dd><p>Specifies the time in milliseconds after which an &ldquo;important&rdquo;
 request or update will be resent.  The default is 2000ms.  You
 probably don&rsquo;t want to tweak this value.
 </p></dd></dl>
+
+<dl>
+<dt><a name="index-anm_002dtimeout-_003c5_002d4294967295_003e"></a><u>Babel Command:</u> <b>anm-timeout &lt;5-4294967295&gt;</b></dt>
+<dt><a name="index-no-anm_002dtimeout-_005b_003c5_002d4294967295_003e_005d"></a><u>Babel Command:</u> <b>no anm-timeout [&lt;5-4294967295&gt;]</b></dt>
+<dd><p>Specifies the time in seconds, for which a record about a formerly active
+authentic Babel neighbor will be retained in ANM (authentic neighbor memory).
+The default is 300s.
+</p></dd></dl>
+
+<dl>
+<dt><a name="index-ts_002dbase-_0028zero_007cunixtime_0029"></a><u>Babel Command:</u> <b>ts-base (zero|unixtime)</b></dt>
+<dt><a name="index-no-ts_002dbase-_005b_0028zero_007cunixtime_0029_005d"></a><u>Babel Command:</u> <b>no ts-base [(zero|unixtime)]</b></dt>
+<dd><p>Controls setting of TS (Timestamp) variable of local routing process. TS is
+put into a PC/TS TLV of every packet being authenticated to prevent replay
+attacks.
+</p><ul>
+<li>
+<code>unixtime</code>:
+Configures UNIX time as TS base: makes TS be greater or equal to the current
+UNIX time, which allows for unique PC/TS pairs for the deployed lifetime of
+a Babel router. This is the default mode in Quagga.
+</li><li>
+<code>zero</code>
+Configures 0 as TS base: TS starts at value 0 and increment each time the
+Packet Counter wraps.
+</li></ul>
+</dd></dl>
 
 <hr size="6">
 <a name="Babel-redistribution"></a>
@@ -4923,6 +4986,26 @@ probably don&rsquo;t want to tweak this value.
 state.  They are mostly useful for troubleshooting.
 </p></dd></dl>
 
+<dl>
+<dt><a name="index-show-babel-authentication-stats"></a><u>Command:</u> <b>show babel authentication stats</b></dt>
+<dt><a name="index-clear-babel-authentication-stats"></a><u>Command:</u> <b>clear babel authentication stats</b></dt>
+<dd><p>There are some statistics built during operation of packet authentication
+extension. These commands display and reset those statistics.
+</p></dd></dl>
+
+<dl>
+<dt><a name="index-show-babel-authentication-memory"></a><u>Command:</u> <b>show babel authentication memory</b></dt>
+<dt><a name="index-clear-babel-authentication-memory"></a><u>Command:</u> <b>clear babel authentication memory</b></dt>
+<dd><p>Babel packet authentication extension maintains an internal table known as
+&quot;authentic neighbors memory&quot; (ANM), which is used to protect against packet
+replay attacks. ANM retains PC/TS values of authentic Babel neighbors, both
+current and formerly active, for &quot;ANM timeout&quot; period of time.
+</p>
+<p>The commands display and reset ANM records. Resetting ANM records may be
+necessary to avoid a &quot;quarantine period&quot; for restarted Babel neighbors
+operating in &quot;NVRAM-less wrap counter&quot; TS mode.
+</p></dd></dl>
+
 <hr size="6">
 <a name="Babel-debugging-commands"></a>
 <table cellpadding="1" cellspacing="1" border="0">
@@ -4949,7 +5032,7 @@ state.  They are mostly useful for troubleshooting.
 <dt><a name="index-no-debug-babel-kind"></a><u>Babel Command:</u> <b>no debug babel <var>kind</var></b></dt>
 <dd><p>Enable or disable debugging messages of a given kind.  <var>kind</var> can
 be one of &lsquo;<samp>common</samp>&rsquo;, &lsquo;<samp>kernel</samp>&rsquo;, &lsquo;<samp>filter</samp>&rsquo;, &lsquo;<samp>timeout</samp>&rsquo;,
-&lsquo;<samp>interface</samp>&rsquo;, &lsquo;<samp>route</samp>&rsquo; or &lsquo;<samp>all</samp>&rsquo;.  Note that if you have
+&lsquo;<samp>interface</samp>&rsquo;, &lsquo;<samp>route</samp>&rsquo;, &lsquo;<samp>authentication</samp>&rsquo; or &lsquo;<samp>all</samp>&rsquo;. Note that if you have
 compiled with the NO_DEBUG flag, then these commands aren&rsquo;t available.
 </p></dd></dl>
 
@@ -10193,6 +10276,7 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-aggregate_002daddress-A_002eB_002eC_002eD_002fM"><code>aggregate-address <var>A.B.C.D/M</var></code></a></td><td valign="top"><a href="#Route-Aggregation">10.3.2 Route Aggregation</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-aggregate_002daddress-A_002eB_002eC_002eD_002fM-as_002dset"><code>aggregate-address <var>A.B.C.D/M</var> as-set</code></a></td><td valign="top"><a href="#Route-Aggregation">10.3.2 Route Aggregation</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-aggregate_002daddress-A_002eB_002eC_002eD_002fM-summary_002donly"><code>aggregate-address <var>A.B.C.D/M</var> summary-only</code></a></td><td valign="top"><a href="#Route-Aggregation">10.3.2 Route Aggregation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-anm_002dtimeout-_003c5_002d4294967295_003e"><code>anm-timeout &lt;5-4294967295&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-area-_003c0_002d4294967295_003e-authentication"><code>area &lt;0-4294967295&gt; authentication</code></a></td><td valign="top"><a href="#OSPF-area">7.3 OSPF area</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-area-_003c0_002d4294967295_003e-authentication-message_002ddigest"><code>area &lt;0-4294967295&gt; authentication message-digest</code></a></td><td valign="top"><a href="#OSPF-area">7.3 OSPF area</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-area-_003c0_002d4294967295_003e-export_002dlist-NAME"><code>area &lt;0-4294967295&gt; export-list NAME</code></a></td><td valign="top"><a href="#OSPF-area">7.3 OSPF area</a></td></tr>
@@ -10221,6 +10305,7 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-auto_002dcost-reference_002dbandwidth-_003c1_002d4294967_003e"><code>auto-cost reference-bandwidth &lt;1-4294967&gt;</code></a></td><td valign="top"><a href="#OSPF-router">7.2 OSPF router</a></td></tr>
 <tr><td colspan="3"> <hr></td></tr>
 <tr><th><a name="Command-Index-1_fn_letter-B">B</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-authentication-mode-authmode-key_002dchain-keychain"><code>babel authentication mode <var>authmode</var> key-chain <var>keychain</var></code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-babel-hello_002dinterval-_003c20_002d655340_003e"><code>babel hello-interval &lt;20-655340&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-babel-resend_002ddelay-_003c20_002d655340_003e"><code>babel resend-delay &lt;20-655340&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-babel-split_002dhorizon"><code>babel split-horizon</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
@@ -10240,6 +10325,8 @@ and Address Family == IP version 6
 <tr><th><a name="Command-Index-1_fn_letter-C">C</a></th><td></td><td></td></tr>
 <tr><td></td><td valign="top"><a href="#index-call-name"><code>call <var>name</var></code></a></td><td valign="top"><a href="#Route-Map-Call-Command">14.4 Route Map Call Command</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-call-WORD"><code>call <var>WORD</var></code></a></td><td valign="top"><a href="#Commands-for-configuring-a-Route-Server">11.2 Commands for configuring a Route Server</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-clear-babel-authentication-memory"><code>clear babel authentication memory</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-clear-babel-authentication-stats"><code>clear babel authentication stats</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-clear-ip-bgp-peer"><code>clear ip bgp <var>peer</var></code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-clear-ip-bgp-peer-soft-in"><code>clear ip bgp <var>peer</var> soft in</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-clear-ip-prefix_002dlist"><code>clear ip prefix-list</code></a></td><td valign="top"><a href="#Clear-counter-of-ip-prefix_002dlist">13.2.4 Clear counter of ip prefix-list</a></td></tr>
@@ -10456,6 +10543,7 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-network-network"><code>network <var>network</var></code></a></td><td valign="top"><a href="#RIP-Configuration">5.2 RIP Configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-network-network-1"><code>network <var>network</var></code></a></td><td valign="top"><a href="#ripngd-Configuration">6.2 ripngd Configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-aggregate_002daddress-A_002eB_002eC_002eD_002fM"><code>no aggregate-address <var>A.B.C.D/M</var></code></a></td><td valign="top"><a href="#Route-Aggregation">10.3.2 Route Aggregation</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-anm_002dtimeout-_005b_003c5_002d4294967295_003e_005d"><code>no anm-timeout [&lt;5-4294967295&gt;]</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-area-_003c0_002d4294967295_003e-authentication"><code>no area &lt;0-4294967295&gt; authentication</code></a></td><td valign="top"><a href="#OSPF-area">7.3 OSPF area</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-area-_003c0_002d4294967295_003e-export_002dlist-NAME"><code>no area &lt;0-4294967295&gt; export-list NAME</code></a></td><td valign="top"><a href="#OSPF-area">7.3 OSPF area</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-area-_003c0_002d4294967295_003e-filter_002dlist-prefix-NAME-in"><code>no area &lt;0-4294967295&gt; filter-list prefix NAME in</code></a></td><td valign="top"><a href="#OSPF-area">7.3 OSPF area</a></td></tr>
@@ -10480,6 +10568,8 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-no-area-a_002eb_002ec_002ed-stub-no_002dsummary"><code>no area <var>a.b.c.d</var> stub no-summary</code></a></td><td valign="top"><a href="#OSPF-area">7.3 OSPF area</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-area-a_002eb_002ec_002ed-virtual_002dlink-a_002eb_002ec_002ed"><code>no area <var>a.b.c.d</var> virtual-link <var>a.b.c.d</var></code></a></td><td valign="top"><a href="#OSPF-area">7.3 OSPF area</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-auto_002dcost-reference_002dbandwidth"><code>no auto-cost reference-bandwidth</code></a></td><td valign="top"><a href="#OSPF-router">7.2 OSPF router</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-babel-authentication"><code>no babel authentication</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-babel-authentication-mode-authmode-key_002dchain-keychain"><code>no babel authentication mode <var>authmode</var> key-chain <var>keychain</var></code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-babel-split_002dhorizon"><code>no babel split-horizon</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-bandwidth-_003c1_002d10000000_003e"><code>no bandwidth &lt;1-10000000&gt;</code></a></td><td valign="top"><a href="#Interface-Commands">4.2 Interface Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-banner-motd"><code>no banner motd</code></a></td><td valign="top"><a href="#Basic-Config-Commands">3.1.1 Basic Config Commands</a></td></tr>
@@ -10611,6 +10701,7 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-no-smux-peer-oid-password"><code>no smux peer <var>oid</var> <var>password</var></code></a></td><td valign="top"><a href="#MIB-and-command-reference">17.3 MIB and command reference</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-timers-basic"><code>no timers basic</code></a></td><td valign="top"><a href="#RIP-Timers">5.10 RIP Timers</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-timers-throttle-spf"><code>no timers throttle spf</code></a></td><td valign="top"><a href="#OSPF-router">7.2 OSPF router</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ts_002dbase-_005b_0028zero_007cunixtime_0029_005d"><code>no ts-base [(zero|unixtime)]</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-version"><code>no version</code></a></td><td valign="top"><a href="#RIP-Version-Control">5.3 RIP Version Control</a></td></tr>
 <tr><td colspan="3"> <hr></td></tr>
 <tr><th><a name="Command-Index-1_fn_letter-O">O</a></th><td></td><td></td></tr>
@@ -10702,6 +10793,8 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-set-metric-metric"><code>set metric <var>metric</var></code></a></td><td valign="top"><a href="#Route-Map-Set-Command">14.3 Route Map Set Command</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-set-src-address"><code>set src <var>address</var></code></a></td><td valign="top"><a href="#zebra-Route-Filtering">4.4 zebra Route Filtering</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-set-weight-weight"><code>set weight <var>weight</var></code></a></td><td valign="top"><a href="#Route-Map-Set-Command">14.3 Route Map Set Command</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-authentication-memory"><code>show babel authentication memory</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-authentication-stats"><code>show babel authentication stats</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-babel-database"><code>show babel database</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-babel-interface"><code>show babel interface</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-babel-neighbor"><code>show babel neighbor</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
@@ -10787,6 +10880,7 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-terminal-length-_003c0_002d512_003e"><code>terminal length <var>&lt;0-512&gt;</var></code></a></td><td valign="top"><a href="#Terminal-Mode-Commands">3.2 Terminal Mode Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-timers-basic-update-timeout-garbage"><code>timers basic <var>update</var> <var>timeout</var> <var>garbage</var></code></a></td><td valign="top"><a href="#RIP-Timers">5.10 RIP Timers</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-timers-throttle-spf-delay-initial_002dholdtime-max_002dholdtime"><code>timers throttle spf <var>delay</var> <var>initial-holdtime</var> <var>max-holdtime</var></code></a></td><td valign="top"><a href="#OSPF-router">7.2 OSPF router</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ts_002dbase-_0028zero_007cunixtime_0029"><code>ts-base (zero|unixtime)</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td colspan="3"> <hr></td></tr>
 <tr><th><a name="Command-Index-1_fn_letter-U">U</a></th><td></td><td></td></tr>
 <tr><td></td><td valign="top"><a href="#index-username-username-nopassword"><code>username <var>username</var> nopassword</code></a></td><td valign="top"><a href="#VTY-shell-username">12.1 VTY shell username</a></td></tr>
@@ -11372,7 +11466,7 @@ and Address Family == IP version 6
 </tr></table>
 <h1>About This Document</h1>
 <p>
-  This document was generated by <em>Denis Ovsienko</em> on <em>June 3, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
+  This document was generated by <em>Denis Ovsienko</em> on <em>June 13, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
 </p>
 <p>
   The buttons in the navigation panels have the following meaning:
@@ -11474,7 +11568,7 @@ and Address Family == IP version 6
 <hr size="1">
 <p>
  <font size="-1">
-  This document was generated by <em>Denis Ovsienko</em> on <em>June 3, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
+  This document was generated by <em>Denis Ovsienko</em> on <em>June 13, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
  </font>
  <br>
 
