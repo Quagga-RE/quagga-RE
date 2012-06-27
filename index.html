@@ -17,7 +17,7 @@ except that this permission notice may be stated in a translation
 approved by Kunihiro Ishiguro.
 
  -->
-<!-- Created on June 21, 2012 by texi2html 1.82
+<!-- Created on June 27, 2012 by texi2html 1.82
 texi2html was written by: 
             Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -9035,7 +9035,7 @@ auto configuration</code>.  To do it, the router must send router advertisement
 messages to the all nodes that exist on the network.
 </p>
 <table class="menu" border="0" cellspacing="0">
-<tr><td align="left" valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">        
+<tr><td align="left" valign="top"><a href="#Router-Advertisement">15.1 Router-scope RA commands</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">        
 </td></tr>
 </table>
 
@@ -9043,6 +9043,64 @@ messages to the all nodes that exist on the network.
 <a name="Router-Advertisement"></a>
 <table cellpadding="1" cellspacing="1" border="0">
 <tr><td valign="middle" align="left">[<a href="#IPv6-Support" title="Previous section in reading order"> &lt; </a>]</td>
+<td valign="middle" align="left">[<a href="#Interface_002dscope-RA-commands" title="Next section in reading order"> &gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="#IPv6-Support" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
+<td valign="middle" align="left">[<a href="#IPv6-Support" title="Up section"> Up </a>]</td>
+<td valign="middle" align="left">[<a href="#Kernel-Interface" title="Next chapter"> &gt;&gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="#Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[<a href="#Command-Index" title="Index">Index</a>]</td>
+<td valign="middle" align="left">[<a href="#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+<a name="Router_002dscope-RA-commands"></a>
+<h2 class="section">15.1 Router-scope RA commands</h2>
+
+<dl>
+<dt><a name="index-ipv6-nd-suppress_002dra"></a><u>Command:</u> <b>ipv6 nd suppress-ra</b></dt>
+<dd><p>Configure the router-scope setting NOT to send router advertisement messages
+(each interface configuration may override this). This setting is the default.
+</p></dd></dl>
+
+<dl>
+<dt><a name="index-no-ipv6-nd-suppress_002dra"></a><u>Command:</u> <b>no ipv6 nd suppress-ra</b></dt>
+<dd><p>Configure the router-scope setting to send router advertisement messages (each
+interface configuration may override this).
+</p></dd></dl>
+
+<dl>
+<dt><a name="index-ipv6-nd-rdnss-ipv6address"></a><u>Command:</u> <b>ipv6 nd rdnss <var>ipv6address</var></b></dt>
+<dt><a name="index-no-ipv6-nd-rdnss-ipv6address"></a><u>Command:</u> <b>no ipv6 nd rdnss <var>ipv6address</var></b></dt>
+<dt><a name="index-ipv6-nd-dnssl-domain"></a><u>Command:</u> <b>ipv6 nd dnssl <var>domain</var></b></dt>
+<dt><a name="index-no-ipv6-nd-dnssl-domain"></a><u>Command:</u> <b>no ipv6 nd dnssl <var>domain</var></b></dt>
+<dd><p>Manage router-scope lists of RDNSS/DNSSL entries. These entries will be
+prepended to each interface&rsquo;s own lists of RDNSS/DNSSL entries. Custom lifetime
+is not supported in these commands, the entries configured this way will always
+have lifetime 2 times the current <var>ra-interval</var> of each interface.
+</p></dd></dl>
+
+<dl>
+<dt><a name="index-ipv6-nd-prefix-connected_002dnone"></a><u>Command:</u> <b>ipv6 nd prefix connected-none</b></dt>
+<dd><p>Configure the router-scope setting NOT to generate Prefix Information TLVs for
+connected prefixes (each interface configuration may override this). This
+setting is the default.
+</p></dd></dl>
+
+<dl>
+<dt><a name="index-ipv6-nd-prefix-connected_002dall-_005bvalid_002dlifetime_005d-_005bpreferred_002dlifetime_005d-_005boff_002dlink_005d-_005bno_002dautoconfig_005d"></a><u>Command:</u> <b>ipv6 nd prefix connected-all [<var>valid-lifetime</var>] [<var>preferred-lifetime</var>] [off-link] [no-autoconfig]</b></dt>
+<dd><p>Configure the router-scope setting to generate Prefix Information TLVs for all
+connected prefixes except link-local ones (each interface configuration may
+override this).
+</p></dd></dl>
+
+<hr size="6">
+<a name="Interface_002dscope-RA-commands"></a>
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="#Router-Advertisement" title="Previous section in reading order"> &lt; </a>]</td>
 <td valign="middle" align="left">[<a href="#Kernel-Interface" title="Next section in reading order"> &gt; </a>]</td>
 <td valign="middle" align="left"> &nbsp; </td>
 <td valign="middle" align="left">[<a href="#IPv6-Support" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
@@ -9057,29 +9115,26 @@ messages to the all nodes that exist on the network.
 <td valign="middle" align="left">[<a href="#Command-Index" title="Index">Index</a>]</td>
 <td valign="middle" align="left">[<a href="#SEC_About" title="About (help)"> ? </a>]</td>
 </tr></table>
-<a name="Router-Advertisement-1"></a>
-<h2 class="section">15.1 Router Advertisement</h2>
-
+<h2 class="section">15.2 Interface-scope RA commands</h2>
 <dl>
-<dt><a name="index-no-ipv6-nd-suppress_002dra"></a><u>Command:</u> <b>no ipv6 nd suppress-ra</b></dt>
-<dd><p>Send router advertisement messages (router-scope optional setting, when set,
-current value is inherited by all new interfaces).
-</p></dd></dl>
-
-<dl>
-<dt><a name="index-ipv6-nd-suppress_002dra"></a><u>Command:</u> <b>ipv6 nd suppress-ra</b></dt>
-<dd><p>Don&rsquo;t send router advertisment messages (router-scope default setting, when set,
-current value is inherited by all new interfaces).
+<dt><a name="index-ipv6-nd-suppress_002dra-auto"></a><u>Interface Command:</u> <b>ipv6 nd suppress-ra auto</b></dt>
+<dd><p>Configure the interface to track router-scope <code>suppress-ra</code> setting. The
+command is not visible in interface configuration section of running-config
+text. This setting is default for all new interfaces.
 </p></dd></dl>
 
 <dl>
 <dt><a name="index-no-ipv6-nd-suppress_002dra-1"></a><u>Interface Command:</u> <b>no ipv6 nd suppress-ra</b></dt>
-<dd><p>Send router advertisment messages (interface-scope setting).
+<dd><p>Configure the interface to send router advertisment messages regardless of
+router-scope <code>suppress-ra</code> setting. This command is visible in interface
+configuration section of running-config text.
 </p></dd></dl>
 
 <dl>
 <dt><a name="index-ipv6-nd-suppress_002dra-1"></a><u>Interface Command:</u> <b>ipv6 nd suppress-ra</b></dt>
-<dd><p>Don&rsquo;t send router advertisment messages (interface-scope setting).
+<dd><p>Configure the interface NOT to send router advertisment messages regardless of
+router-scope <code>suppress-ra</code> setting. This command is visible in interface
+configuration section of running-config text.
 </p></dd></dl>
 
 <dl>
@@ -9121,6 +9176,28 @@ contains a complete IP address by setting R flag.
 <p>Default: not set, i.e. hosts do not assume a complete IP address is placed.
 </p></li></ul>
 </dd></dl>
+
+<dl>
+<dt><a name="index-ipv6-nd-prefix-connected_002dauto"></a><u>Interface Command:</u> <b>ipv6 nd prefix connected-auto</b></dt>
+<dt><a name="index-no-ipv6-nd-prefix-_0028connected_002dall_007cconnected_002dnone_0029"></a><u>Interface Command:</u> <b>no ipv6 nd prefix (connected-all|connected-none)</b></dt>
+<dd><p>Configure the interface to track router-scope setting of connected prefixes
+advertisement. The commands are not visible in interface configuration section
+of running-config text. This setting is the default.
+</p></dd></dl>
+
+<dl>
+<dt><a name="index-ipv6-nd-prefix-connected_002dall-_005bvalid_002dlifetime_005d-_005bpreferred_002dlifetime_005d-_005boff_002dlink_005d-_005bno_002dautoconfig_005d-1"></a><u>Interface Command:</u> <b>ipv6 nd prefix connected-all [<var>valid-lifetime</var>] [<var>preferred-lifetime</var>] [off-link] [no-autoconfig]</b></dt>
+<dd><p>Configure the interface to enable connected prefixes advertisement regardless
+of router-scope setting. This command is visible in interface configuration
+section of running-config text.
+</p></dd></dl>
+
+<dl>
+<dt><a name="index-ipv6-nd-prefix-connected_002dnone-1"></a><u>Interface Command:</u> <b>ipv6 nd prefix connected-none</b></dt>
+<dd><p>Configure the interface to disable connected prefixes advertisement regardless
+of router-scope setting. This command is visible in interface configuration
+section of running-config text.
+</p></dd></dl>
 
 <dl>
 <dt><a name="index-ipv6-nd-ra_002dinterval-_003c1_002d1800_003e"></a><u>Interface Command:</u> <b>ipv6 nd ra-interval &lt;1-1800&gt;</b></dt>
@@ -9285,18 +9362,7 @@ trailing &quot;root&quot; period. The domain name must meet the requirements of 
 <p>Default: 2 times current <var>ra-interval</var>
 </p></li></ul>
 
-<p>See below for router-scope variant of this command.
-</p></dd></dl>
-
-<dl>
-<dt><a name="index-ipv6-nd-rdnss-ipv6address"></a><u>Command:</u> <b>ipv6 nd rdnss <var>ipv6address</var></b></dt>
-<dt><a name="index-no-ipv6-nd-rdnss-ipv6address"></a><u>Command:</u> <b>no ipv6 nd rdnss <var>ipv6address</var></b></dt>
-<dt><a name="index-ipv6-nd-dnssl-domain"></a><u>Command:</u> <b>ipv6 nd dnssl <var>domain</var></b></dt>
-<dt><a name="index-no-ipv6-nd-dnssl-domain"></a><u>Command:</u> <b>no ipv6 nd dnssl <var>domain</var></b></dt>
-<dd><p>Manage router-scope lists of RDNSS/DNSSL entries. These entries will be
-prepended to each interface&rsquo;s own lists of RDNSS/DNSSL entries. Custom lifetime
-is not supported in these commands, the entries configured this way will always
-have lifetime 2 times the current <var>ra-interval</var> of each interface.
+<p>See also the router-scope variant of this command.
 </p></dd></dl>
 
 <table><tr><td>&nbsp;</td><td><pre class="example">interface eth0
@@ -9315,7 +9381,7 @@ and <cite>RFC4191 (Default Router Preferences and More-Specific Routes)</cite>.
 </p><hr size="6">
 <a name="Kernel-Interface"></a>
 <table cellpadding="1" cellspacing="1" border="0">
-<tr><td valign="middle" align="left">[<a href="#Router-Advertisement" title="Previous section in reading order"> &lt; </a>]</td>
+<tr><td valign="middle" align="left">[<a href="#Interface_002dscope-RA-commands" title="Previous section in reading order"> &lt; </a>]</td>
 <td valign="middle" align="left">[<a href="#SNMP-Support" title="Next section in reading order"> &gt; </a>]</td>
 <td valign="middle" align="left"> &nbsp; </td>
 <td valign="middle" align="left">[<a href="#IPv6-Support" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
@@ -10465,25 +10531,31 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-ip-route-network-netmask-gateway"><code>ip route <var>network</var> <var>netmask</var> <var>gateway</var></code></a></td><td valign="top"><a href="#Static-Route-Commands">4.3 Static Route Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-ip-split_002dhorizon"><code>ip split-horizon</code></a></td><td valign="top"><a href="#RIP-Configuration">5.2 RIP Configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-ipv6-address-address_002fprefix"><code>ipv6 address <var>address/prefix</var></code></a></td><td valign="top"><a href="#Interface-Commands">4.2 Interface Commands</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-adv_002dinterval_002doption"><code>ipv6 nd adv-interval-option</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-dnssl-domain"><code>ipv6 nd dnssl <var>domain</var></code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-dnssl-domain-_005blifetime_005d"><code>ipv6 nd dnssl <var>domain</var> [<var>lifetime</var>]</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-home_002dagent_002dconfig_002dflag"><code>ipv6 nd home-agent-config-flag</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-home_002dagent_002dlifetime-_003c0_002d65520_003e"><code>ipv6 nd home-agent-lifetime &lt;0-65520&gt;</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-home_002dagent_002dpreference-_003c0_002d65535_003e"><code>ipv6 nd home-agent-preference &lt;0-65535&gt;</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-managed_002dconfig_002dflag"><code>ipv6 nd managed-config-flag</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-mtu-_003c1_002d65535_003e"><code>ipv6 nd mtu &lt;1-65535&gt;</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-other_002dconfig_002dflag"><code>ipv6 nd other-config-flag</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-prefix-ipv6prefix-_005bvalid_002dlifetime_005d-_005bpreferred_002dlifetime_005d-_005boff_002dlink_005d-_005bno_002dautoconfig_005d-_005brouter_002daddress_005d"><code>ipv6 nd prefix <var>ipv6prefix</var> [<var>valid-lifetime</var>] [<var>preferred-lifetime</var>] [off-link] [no-autoconfig] [router-address]</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-ra_002dinterval-_003c1_002d1800_003e"><code>ipv6 nd ra-interval &lt;1-1800&gt;</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-ra_002dinterval-msec-_003c70_002d1800000_003e"><code>ipv6 nd ra-interval msec &lt;70-1800000&gt;</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-ra_002dlifetime-_003c0_002d9000_003e"><code>ipv6 nd ra-lifetime &lt;0-9000&gt;</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-rdnss-ipv6address"><code>ipv6 nd rdnss <var>ipv6address</var></code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-rdnss-ipv6address-_005blifetime_005d"><code>ipv6 nd rdnss <var>ipv6address</var> [<var>lifetime</var>]</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-reachable_002dtime-_003c1_002d3600000_003e"><code>ipv6 nd reachable-time &lt;1-3600000&gt;</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-router_002dpreference-_0028high_007cmedium_007clow_0029"><code>ipv6 nd router-preference (high|medium|low)</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-suppress_002dra"><code>ipv6 nd suppress-ra</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ipv6-nd-suppress_002dra-1"><code>ipv6 nd suppress-ra</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-adv_002dinterval_002doption"><code>ipv6 nd adv-interval-option</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-dnssl-domain"><code>ipv6 nd dnssl <var>domain</var></code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-dnssl-domain-_005blifetime_005d"><code>ipv6 nd dnssl <var>domain</var> [<var>lifetime</var>]</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-home_002dagent_002dconfig_002dflag"><code>ipv6 nd home-agent-config-flag</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-home_002dagent_002dlifetime-_003c0_002d65520_003e"><code>ipv6 nd home-agent-lifetime &lt;0-65520&gt;</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-home_002dagent_002dpreference-_003c0_002d65535_003e"><code>ipv6 nd home-agent-preference &lt;0-65535&gt;</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-managed_002dconfig_002dflag"><code>ipv6 nd managed-config-flag</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-mtu-_003c1_002d65535_003e"><code>ipv6 nd mtu &lt;1-65535&gt;</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-other_002dconfig_002dflag"><code>ipv6 nd other-config-flag</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-prefix-connected_002dall-_005bvalid_002dlifetime_005d-_005bpreferred_002dlifetime_005d-_005boff_002dlink_005d-_005bno_002dautoconfig_005d"><code>ipv6 nd prefix connected-all [<var>valid-lifetime</var>] [<var>preferred-lifetime</var>] [off-link] [no-autoconfig]</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-prefix-connected_002dall-_005bvalid_002dlifetime_005d-_005bpreferred_002dlifetime_005d-_005boff_002dlink_005d-_005bno_002dautoconfig_005d-1"><code>ipv6 nd prefix connected-all [<var>valid-lifetime</var>] [<var>preferred-lifetime</var>] [off-link] [no-autoconfig]</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-prefix-connected_002dauto"><code>ipv6 nd prefix connected-auto</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-prefix-connected_002dnone"><code>ipv6 nd prefix connected-none</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-prefix-connected_002dnone-1"><code>ipv6 nd prefix connected-none</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-prefix-ipv6prefix-_005bvalid_002dlifetime_005d-_005bpreferred_002dlifetime_005d-_005boff_002dlink_005d-_005bno_002dautoconfig_005d-_005brouter_002daddress_005d"><code>ipv6 nd prefix <var>ipv6prefix</var> [<var>valid-lifetime</var>] [<var>preferred-lifetime</var>] [off-link] [no-autoconfig] [router-address]</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-ra_002dinterval-_003c1_002d1800_003e"><code>ipv6 nd ra-interval &lt;1-1800&gt;</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-ra_002dinterval-msec-_003c70_002d1800000_003e"><code>ipv6 nd ra-interval msec &lt;70-1800000&gt;</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-ra_002dlifetime-_003c0_002d9000_003e"><code>ipv6 nd ra-lifetime &lt;0-9000&gt;</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-rdnss-ipv6address"><code>ipv6 nd rdnss <var>ipv6address</var></code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-rdnss-ipv6address-_005blifetime_005d"><code>ipv6 nd rdnss <var>ipv6address</var> [<var>lifetime</var>]</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-reachable_002dtime-_003c1_002d3600000_003e"><code>ipv6 nd reachable-time &lt;1-3600000&gt;</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-router_002dpreference-_0028high_007cmedium_007clow_0029"><code>ipv6 nd router-preference (high|medium|low)</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-suppress_002dra"><code>ipv6 nd suppress-ra</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-suppress_002dra-1"><code>ipv6 nd suppress-ra</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ipv6-nd-suppress_002dra-auto"><code>ipv6 nd suppress-ra auto</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-ipv6-ospf6-cost-COST"><code>ipv6 ospf6 cost COST</code></a></td><td valign="top"><a href="#OSPF6-interface">8.3 OSPF6 interface</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-ipv6-ospf6-dead_002dinterval-DEADINTERVAL"><code>ipv6 ospf6 dead-interval DEADINTERVAL</code></a></td><td valign="top"><a href="#OSPF6-interface">8.3 OSPF6 interface</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-ipv6-ospf6-hello_002dinterval-HELLOINTERVAL"><code>ipv6 ospf6 hello-interval HELLOINTERVAL</code></a></td><td valign="top"><a href="#OSPF6-interface">8.3 OSPF6 interface</a></td></tr>
@@ -10654,24 +10726,25 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-no-ip-rip-authentication-string-string"><code>no ip rip authentication string <var>string</var></code></a></td><td valign="top"><a href="#RIP-Authentication">5.9 RIP Authentication</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-ip-split_002dhorizon"><code>no ip split-horizon</code></a></td><td valign="top"><a href="#RIP-Configuration">5.2 RIP Configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-ipv6-address-address_002fprefix"><code>no ipv6 address <var>address/prefix</var></code></a></td><td valign="top"><a href="#Interface-Commands">4.2 Interface Commands</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-adv_002dinterval_002doption"><code>no ipv6 nd adv-interval-option</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-dnssl-domain"><code>no ipv6 nd dnssl <var>domain</var></code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-dnssl-domain-_005blifetime_005d"><code>no ipv6 nd dnssl <var>domain</var> [<var>lifetime</var>]</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-home_002dagent_002dconfig_002dflag"><code>no ipv6 nd home-agent-config-flag</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-home_002dagent_002dlifetime-_005b_003c0_002d65520_003e_005d"><code>no ipv6 nd home-agent-lifetime [&lt;0-65520&gt;]</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-home_002dagent_002dpreference-_005b_003c0_002d65535_003e_005d"><code>no ipv6 nd home-agent-preference [&lt;0-65535&gt;]</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-managed_002dconfig_002dflag"><code>no ipv6 nd managed-config-flag</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-mtu-_005b_003c1_002d65535_003e_005d"><code>no ipv6 nd mtu [&lt;1-65535&gt;]</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-other_002dconfig_002dflag"><code>no ipv6 nd other-config-flag</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-ra_002dinterval-_005b_003c1_002d1800_003e_005d"><code>no ipv6 nd ra-interval [&lt;1-1800&gt;]</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-ra_002dinterval-_005bmsec-_003c70_002d1800000_003e_005d"><code>no ipv6 nd ra-interval [msec &lt;70-1800000&gt;]</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-ra_002dlifetime-_005b_003c0_002d9000_003e_005d"><code>no ipv6 nd ra-lifetime [&lt;0-9000&gt;]</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-rdnss-ipv6address"><code>no ipv6 nd rdnss <var>ipv6address</var></code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-rdnss-ipv6address-_005blifetime_005d"><code>no ipv6 nd rdnss <var>ipv6address</var> [<var>lifetime</var>]</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-reachable_002dtime-_005b_003c1_002d3600000_003e_005d"><code>no ipv6 nd reachable-time [&lt;1-3600000&gt;]</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-router_002dpreference-_005b_0028high_007cmedium_007clow_0029_005d"><code>no ipv6 nd router-preference [(high|medium|low)]</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-suppress_002dra"><code>no ipv6 nd suppress-ra</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-suppress_002dra-1"><code>no ipv6 nd suppress-ra</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router Advertisement</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-adv_002dinterval_002doption"><code>no ipv6 nd adv-interval-option</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-dnssl-domain"><code>no ipv6 nd dnssl <var>domain</var></code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-dnssl-domain-_005blifetime_005d"><code>no ipv6 nd dnssl <var>domain</var> [<var>lifetime</var>]</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-home_002dagent_002dconfig_002dflag"><code>no ipv6 nd home-agent-config-flag</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-home_002dagent_002dlifetime-_005b_003c0_002d65520_003e_005d"><code>no ipv6 nd home-agent-lifetime [&lt;0-65520&gt;]</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-home_002dagent_002dpreference-_005b_003c0_002d65535_003e_005d"><code>no ipv6 nd home-agent-preference [&lt;0-65535&gt;]</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-managed_002dconfig_002dflag"><code>no ipv6 nd managed-config-flag</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-mtu-_005b_003c1_002d65535_003e_005d"><code>no ipv6 nd mtu [&lt;1-65535&gt;]</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-other_002dconfig_002dflag"><code>no ipv6 nd other-config-flag</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-prefix-_0028connected_002dall_007cconnected_002dnone_0029"><code>no ipv6 nd prefix (connected-all|connected-none)</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-ra_002dinterval-_005b_003c1_002d1800_003e_005d"><code>no ipv6 nd ra-interval [&lt;1-1800&gt;]</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-ra_002dinterval-_005bmsec-_003c70_002d1800000_003e_005d"><code>no ipv6 nd ra-interval [msec &lt;70-1800000&gt;]</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-ra_002dlifetime-_005b_003c0_002d9000_003e_005d"><code>no ipv6 nd ra-lifetime [&lt;0-9000&gt;]</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-rdnss-ipv6address"><code>no ipv6 nd rdnss <var>ipv6address</var></code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-rdnss-ipv6address-_005blifetime_005d"><code>no ipv6 nd rdnss <var>ipv6address</var> [<var>lifetime</var>]</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-reachable_002dtime-_005b_003c1_002d3600000_003e_005d"><code>no ipv6 nd reachable-time [&lt;1-3600000&gt;]</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-router_002dpreference-_005b_0028high_007cmedium_007clow_0029_005d"><code>no ipv6 nd router-preference [(high|medium|low)]</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-suppress_002dra"><code>no ipv6 nd suppress-ra</code></a></td><td valign="top"><a href="#Router-Advertisement">15.1 Router-scope RA commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ipv6-nd-suppress_002dra-1"><code>no ipv6 nd suppress-ra</code></a></td><td valign="top"><a href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-ipv6-ospf6-cost"><code>no ipv6 ospf6 cost</code></a></td><td valign="top"><a href="#OSPF6-interface">8.3 OSPF6 interface</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-ipv6-ospf6-dead_002dinterval"><code>no ipv6 ospf6 dead-interval</code></a></td><td valign="top"><a href="#OSPF6-interface">8.3 OSPF6 interface</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-ipv6-ospf6-hello_002dinterval"><code>no ipv6 ospf6 hello-interval</code></a></td><td valign="top"><a href="#OSPF6-interface">8.3 OSPF6 interface</a></td></tr>
@@ -11461,7 +11534,8 @@ and Address Family == IP version 6
   </ul></li>
   <li><a name="toc-IPv6-Support-1" href="#IPv6-Support">15. IPv6 Support</a>
   <ul class="toc">
-    <li><a name="toc-Router-Advertisement-1" href="#Router-Advertisement">15.1 Router Advertisement</a></li>
+    <li><a name="toc-Router_002dscope-RA-commands" href="#Router-Advertisement">15.1 Router-scope RA commands</a></li>
+    <li><a name="toc-Interface_002dscope-RA-commands" href="#Interface_002dscope-RA-commands">15.2 Interface-scope RA commands</a></li>
   </ul></li>
   <li><a name="toc-Kernel-Interface-1" href="#Kernel-Interface">16. Kernel Interface</a></li>
   <li><a name="toc-SNMP-Support-1" href="#SNMP-Support">17. SNMP Support</a>
@@ -11499,7 +11573,7 @@ and Address Family == IP version 6
 </tr></table>
 <h1>About This Document</h1>
 <p>
-  This document was generated by <em>Denis Ovsienko</em> on <em>June 21, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
+  This document was generated by <em>Denis Ovsienko</em> on <em>June 27, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
 </p>
 <p>
   The buttons in the navigation panels have the following meaning:
@@ -11601,7 +11675,7 @@ and Address Family == IP version 6
 <hr size="1">
 <p>
  <font size="-1">
-  This document was generated by <em>Denis Ovsienko</em> on <em>June 21, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
+  This document was generated by <em>Denis Ovsienko</em> on <em>June 27, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
  </font>
  <br>
 
