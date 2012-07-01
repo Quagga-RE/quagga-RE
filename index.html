@@ -17,7 +17,7 @@ except that this permission notice may be stated in a translation
 approved by Kunihiro Ishiguro.
 
  -->
-<!-- Created on June 27, 2012 by texi2html 1.82
+<!-- Created on July 1, 2012 by texi2html 1.82
 texi2html was written by: 
             Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -4864,6 +4864,19 @@ is 20000ms.
 </p></dd></dl>
 
 <dl>
+<dt><a name="index-babel-rxcost-_003c1_002d65534_003e"></a><u>Interface Command:</u> <b>babel rxcost &lt;1-65534&gt;</b></dt>
+<dd><p>Specifies the base receive cost for this interface.  For wireless
+interfaces, it specifies the multiplier used for computing the ETX
+reception cost (default 256); for wired interfaces, it specifies the
+cost that will be advertised to neighbours.  This value is reset when
+the wired/wireless attribute of the interface is changed.
+</p>
+<p>Do not use this command unless you know what you are doing; in most
+networks, acting directly on the cost using route maps is a better
+technique.
+</p></dd></dl>
+
+<dl>
 <dt><a name="index-babel-authentication-mode-authmode-key_002dchain-keychain"></a><u>Interface Command:</u> <b>babel authentication mode <var>authmode</var> key-chain <var>keychain</var></b></dt>
 <dt><a name="index-no-babel-authentication-mode-authmode-key_002dchain-keychain"></a><u>Interface Command:</u> <b>no babel authentication mode <var>authmode</var> key-chain <var>keychain</var></b></dt>
 <dd><p>Manage (add or remove) configured security associations (CSAs) for the current
@@ -4978,12 +4991,11 @@ Packet Counter wraps.
 <h2 class="section">9.4 Show Babel information</h2>
 
 <dl>
-<dt><a name="index-show-babel-database"></a><u>Command:</u> <b>show babel database</b></dt>
+<dt><a name="index-show-babel-route"></a><u>Command:</u> <b>show babel route</b></dt>
 <dt><a name="index-show-babel-interface"></a><u>Command:</u> <b>show babel interface</b></dt>
 <dt><a name="index-show-babel-neighbor"></a><u>Command:</u> <b>show babel neighbor</b></dt>
 <dt><a name="index-show-babel-parameters"></a><u>Command:</u> <b>show babel parameters</b></dt>
-<dd><p>These commands dump various parts of <code>babeld</code>&rsquo;s internal
-state.  They are mostly useful for troubleshooting.
+<dd><p>These commands dump various parts of <code>babeld</code>&rsquo;s internal state.
 </p></dd></dl>
 
 <dl>
@@ -10401,6 +10413,7 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-babel-authentication-mode-authmode-key_002dchain-keychain"><code>babel authentication mode <var>authmode</var> key-chain <var>keychain</var></code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-babel-hello_002dinterval-_003c20_002d655340_003e"><code>babel hello-interval &lt;20-655340&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-babel-resend_002ddelay-_003c20_002d655340_003e"><code>babel resend-delay &lt;20-655340&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-rxcost-_003c1_002d65534_003e"><code>babel rxcost &lt;1-65534&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-babel-split_002dhorizon"><code>babel split-horizon</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-babel-update_002dinterval-_003c20_002d655340_003e"><code>babel update-interval &lt;20-655340&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-babel-wired"><code>babel wired</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
@@ -10901,10 +10914,10 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-set-weight-weight"><code>set weight <var>weight</var></code></a></td><td valign="top"><a href="#Route-Map-Set-Command">14.3 Route Map Set Command</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-babel-authentication-memory"><code>show babel authentication memory</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-babel-authentication-stats"><code>show babel authentication stats</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-show-babel-database"><code>show babel database</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-babel-interface"><code>show babel interface</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-babel-neighbor"><code>show babel neighbor</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-babel-parameters"><code>show babel parameters</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-route"><code>show babel route</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-debug"><code>show debug</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-debugging-ospf"><code>show debugging ospf</code></a></td><td valign="top"><a href="#Debugging-OSPF">7.7 Debugging OSPF</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-debugging-rip"><code>show debugging rip</code></a></td><td valign="top"><a href="#RIP-Debug-Commands">5.12 RIP Debug Commands</a></td></tr>
@@ -11573,7 +11586,7 @@ and Address Family == IP version 6
 </tr></table>
 <h1>About This Document</h1>
 <p>
-  This document was generated by <em>Denis Ovsienko</em> on <em>June 27, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
+  This document was generated by <em>Denis Ovsienko</em> on <em>July 1, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
 </p>
 <p>
   The buttons in the navigation panels have the following meaning:
@@ -11675,7 +11688,7 @@ and Address Family == IP version 6
 <hr size="1">
 <p>
  <font size="-1">
-  This document was generated by <em>Denis Ovsienko</em> on <em>June 27, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
+  This document was generated by <em>Denis Ovsienko</em> on <em>July 1, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
  </font>
  <br>
 
