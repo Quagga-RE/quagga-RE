@@ -39,7 +39,7 @@ struct babel_csa_item
 #define BABEL_MAXDIGESTSOUT 8
 #define BABEL_MAXDIGESTSIN 4
 /* 1 PC/TS, maximum size/amount of HD TLVs, all including Type and Length fields */
-#define BABEL_MAXAUTHSPACE (8 + BABEL_MAXDIGESTSOUT * (4 + HASH_SIZE_MAX))
+#define BABEL_MAXAUTHSPACE (8 + BABEL_MAXDIGESTSOUT * (5 + HASH_SIZE_MAX))
 extern int babel_auth_check_packet (struct interface *, const unsigned char *,
                                     const unsigned char *, const u_int16_t);
 extern int babel_auth_make_packet (struct interface *, unsigned char *, const u_int16_t);
