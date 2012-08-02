@@ -17,7 +17,7 @@ except that this permission notice may be stated in a translation
 approved by Kunihiro Ishiguro.
 
  -->
-<!-- Created on July 5, 2012 by texi2html 1.82
+<!-- Created on August 2, 2012 by texi2html 1.82
 texi2html was written by: 
             Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -70,7 +70,7 @@ ul.toc {list-style: none}
 		     
 <p><a href="http://www.quagga.net">Quagga</a> is an advanced routing software package
 that provides a suite of TCP/IP based routing protocols.  This is the Manual
-for Quagga 0.99.17.10. <a href="http://www.quagga.net">Quagga</a> is a fork of 
+for Quagga 0.99.17.11. <a href="http://www.quagga.net">Quagga</a> is a fork of 
 <a href="http://www.zebra.org">GNU Zebra</a>.
 </p>
 <p>Copyright &copy; 1999-2005 Kunihiro Ishiguro, et al.
@@ -1621,7 +1621,7 @@ Trying 127.0.0.1...
 Connected to localhost.
 Escape character is '^]'.
 
-Hello, this is Quagga (version 0.99.17.10)
+Hello, this is Quagga (version 0.99.17.11)
 Copyright &copy; 1999-2005 Kunihiro Ishiguro, et al.
 
 User Access Verification
@@ -4831,6 +4831,31 @@ must be too.
 </p></dd></dl>
 
 <dl>
+<dt><a name="index-babel-resend_002ddelay-_003c20_002d655340_003e"></a><u>Command:</u> <b>babel resend-delay &lt;20-655340&gt;</b></dt>
+<dd><p>Specifies the time after which important messages are resent when
+avoiding a black-hole.  The default is 2000ms.
+</p></dd></dl>
+
+<dl>
+<dt><a name="index-babel-diversity"></a><u>Command:</u> <b>babel diversity</b></dt>
+<dt><a name="index-no-babel-diversity"></a><u>Command:</u> <b>no babel diversity</b></dt>
+<dd><p>Enable or disable routing using radio frequency diversity.  This is
+highly recommended in networks with many wireless nodes.
+</p>
+<p>If you enable this, you will probably want to set <code>babel
+diversity-factor</code> and <code>babel channel</code> below.
+</p></dd></dl>
+
+<dl>
+<dt><a name="index-babel-diversity_002dfactor-_003c1_002d256_003e"></a><u>Command:</u> <b>babel diversity-factor &lt;1-256&gt;</b></dt>
+<dd><p>Sets the multiplicative factor used for diversity routing, in units of
+1/256; lower values cause diversity to play a more important role in
+route selection.  The default it 256, which means that diversity plays
+no role in route selection; you will probably want to set that to 128
+or less on nodes with multiple independent radios.
+</p></dd></dl>
+
+<dl>
 <dt><a name="index-network-ifname-2"></a><u>Babel Command:</u> <b>network <var>ifname</var></b></dt>
 <dt><a name="index-no-network-ifname-1"></a><u>Babel Command:</u> <b>no network <var>ifname</var></b></dt>
 <dd><p>Enable or disable Babel on the given interface.
@@ -4849,9 +4874,12 @@ cause slower convergence and extra routing traffic.
 <dt><a name="index-babel-split_002dhorizon"></a><u>Interface Command:</u> <b>babel split-horizon</b></dt>
 <dt><a name="index-no-babel-split_002dhorizon"></a><u>Interface Command:</u> <b>no babel split-horizon</b></dt>
 <dd><p>Specifies whether to perform split-horizon on the interface.
-Specifying <code>no babel split-horizon</code> (the default) is always
-correct, while <code>babel split-horizon</code> is an optimisation that
-should only be used on symmetric and transitive (wired) networks.
+Specifying <code>no babel split-horizon</code> is always correct, while
+<code>babel split-horizon</code> is an optimisation that should only be used
+on symmetric and transitive (wired) networks.  The default is
+<code>babel split-horizon</code> on wired interfaces, and <code>no babel
+split-horizon</code> on wireless interfaces.  This flag is reset when the
+wired/wireless status of an interface is changed.
 </p></dd></dl>
 
 <dl>
@@ -4868,6 +4896,22 @@ hello interval.  The default is 4000ms.
 Since Babel makes extensive use of triggered updates, this can be set
 to fairly high values on links with little packet loss.  The default
 is 20000ms.
+</p></dd></dl>
+
+<dl>
+<dt><a name="index-babel-channel-_003c1_002d254_003e"></a><u>Interface Command:</u> <b>babel channel &lt;1-254&gt;</b></dt>
+<dt><a name="index-babel-channel-interfering"></a><u>Interface Command:</u> <b>babel channel interfering</b></dt>
+<dt><a name="index-babel-channel-noninterfering"></a><u>Interface Command:</u> <b>babel channel noninterfering</b></dt>
+<dd><p>Set the channel number that diversity routing uses for this interface
+(see <code>babel diversity</code> above).  Noninterfering interfaces are
+assumed to only interfere with themselves, interfering interfaces are
+assumed to interfere with all other channels except noninterfering
+channels, and interfaces with a channel number interfere with
+interfering interfaces and interfaces with the same channel number.
+The default is &lsquo;<samp>babel channel interfering</samp>&rsquo; for wireless
+interfaces, and &lsquo;<samp>babel channel noninterfering</samp>&rsquo; for wired
+interfaces.  This is reset when the wired/wireless status of an
+interface is changed.
 </p></dd></dl>
 
 <dl>
@@ -4916,7 +4960,25 @@ time of this writing and require Quagga to be built with gcrypt library.
 </p></dd></dl>
 
 <dl>
-<dt><a name="index-babel-resend_002ddelay-_003c20_002d655340_003e"></a><u>Babel Command:</u> <b>babel resend-delay &lt;20-655340&gt;</b></dt>
+<dt><a name="index-babel-authentication-rx_002drequired"></a><u>Interface Command:</u> <b>babel authentication rx-required</b></dt>
+<dd><p>Configure an authenticated (with CSAs) Babel interface so, that an incoming
+packet must pass all usual authentication checks before being processed at Babel
+protocol level. If the packet does not pass any of the normally required checks,
+it is discarded. This setting is the default.
+</p></dd></dl>
+
+<dl>
+<dt><a name="index-no-babel-authentication-rx_002drequired"></a><u>Interface Command:</u> <b>no babel authentication rx-required</b></dt>
+<dd><p>Configure an authenticated (with CSAs) Babel interface so, that an incoming
+packet is tried against usual authentication checks, but then anyway processed
+at Babel protocol level regardless of checks results. This mode is mainly
+purposed for debugging and migration cases. It effectively cancels packet
+authentication, but keeps statistics and logging reflecting live results of
+authentication checks.
+</p></dd></dl>
+
+<dl>
+<dt><a name="index-babel-resend_002ddelay-_003c20_002d655340_003e-1"></a><u>Babel Command:</u> <b>babel resend-delay &lt;20-655340&gt;</b></dt>
 <dd><p>Specifies the time in milliseconds after which an &ldquo;important&rdquo;
 request or update will be resent.  The default is 2000ms.  You
 probably don&rsquo;t want to tweak this value.
@@ -4999,7 +5061,12 @@ Packet Counter wraps.
 
 <dl>
 <dt><a name="index-show-babel-route"></a><u>Command:</u> <b>show babel route</b></dt>
+<dt><a name="index-show-babel-route-A_002eB_002eC_002eD"></a><u>Command:</u> <b>show babel route A.B.C.D</b></dt>
+<dt><a name="index-show-babel-route-X_003aX_003a_003aX_003aX"></a><u>Command:</u> <b>show babel route X:X::X:X</b></dt>
+<dt><a name="index-show-babel-route-A_002eB_002eC_002eD_002fM"></a><u>Command:</u> <b>show babel route A.B.C.D/M</b></dt>
+<dt><a name="index-show-babel-route-X_003aX_003a_003aX_003aX_002fM"></a><u>Command:</u> <b>show babel route X:X::X:X/M</b></dt>
 <dt><a name="index-show-babel-interface"></a><u>Command:</u> <b>show babel interface</b></dt>
+<dt><a name="index-show-babel-interface-ifname"></a><u>Command:</u> <b>show babel interface <var>ifname</var></b></dt>
 <dt><a name="index-show-babel-neighbor"></a><u>Command:</u> <b>show babel neighbor</b></dt>
 <dt><a name="index-show-babel-parameters"></a><u>Command:</u> <b>show babel parameters</b></dt>
 <dd><p>These commands dump various parts of <code>babeld</code>&rsquo;s internal state.
@@ -5007,9 +5074,18 @@ Packet Counter wraps.
 
 <dl>
 <dt><a name="index-show-babel-authentication-stats"></a><u>Command:</u> <b>show babel authentication stats</b></dt>
+<dt><a name="index-show-babel-authentication-stats-interface"></a><u>Command:</u> <b>show babel authentication stats interface</b></dt>
+<dt><a name="index-show-babel-authentication-stats-interface-ifname"></a><u>Command:</u> <b>show babel authentication stats interface <var>ifname</var></b></dt>
+<dd><p>Display authentication statistics counters of the Babel protocol instance, of
+every Babel-enabled interface or the specified Babel interface respectively.
+</p></dd></dl>
+
+<dl>
 <dt><a name="index-clear-babel-authentication-stats"></a><u>Command:</u> <b>clear babel authentication stats</b></dt>
-<dd><p>There are some statistics built during operation of packet authentication
-extension. These commands display and reset those statistics.
+<dt><a name="index-clear-babel-authentication-stats-interface"></a><u>Command:</u> <b>clear babel authentication stats interface</b></dt>
+<dt><a name="index-clear-babel-authentication-stats-interface-ifname"></a><u>Command:</u> <b>clear babel authentication stats interface <var>ifname</var></b></dt>
+<dd><p>Reset authentication statistics counters of the Babel protocol instance, of
+every Babel-enabled interface or the specified Babel interface respectively.
 </p></dd></dl>
 
 <dl>
@@ -10421,8 +10497,15 @@ and Address Family == IP version 6
 <tr><td colspan="3"> <hr></td></tr>
 <tr><th><a name="Command-Index-1_fn_letter-B">B</a></th><td></td><td></td></tr>
 <tr><td></td><td valign="top"><a href="#index-babel-authentication-mode-authmode-key_002dchain-keychain"><code>babel authentication mode <var>authmode</var> key-chain <var>keychain</var></code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-authentication-rx_002drequired"><code>babel authentication rx-required</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-channel-_003c1_002d254_003e"><code>babel channel &lt;1-254&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-channel-interfering"><code>babel channel interfering</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-channel-noninterfering"><code>babel channel noninterfering</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-diversity"><code>babel diversity</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-diversity_002dfactor-_003c1_002d256_003e"><code>babel diversity-factor &lt;1-256&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-babel-hello_002dinterval-_003c20_002d655340_003e"><code>babel hello-interval &lt;20-655340&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-babel-resend_002ddelay-_003c20_002d655340_003e"><code>babel resend-delay &lt;20-655340&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-resend_002ddelay-_003c20_002d655340_003e-1"><code>babel resend-delay &lt;20-655340&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-babel-rxcost-_003c1_002d65534_003e"><code>babel rxcost &lt;1-65534&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-babel-split_002dhorizon"><code>babel split-horizon</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-babel-update_002dinterval-_003c20_002d655340_003e"><code>babel update-interval &lt;20-655340&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
@@ -10443,6 +10526,8 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-call-WORD"><code>call <var>WORD</var></code></a></td><td valign="top"><a href="#Commands-for-configuring-a-Route-Server">11.2 Commands for configuring a Route Server</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-clear-babel-authentication-memory"><code>clear babel authentication memory</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-clear-babel-authentication-stats"><code>clear babel authentication stats</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-clear-babel-authentication-stats-interface"><code>clear babel authentication stats interface</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-clear-babel-authentication-stats-interface-ifname"><code>clear babel authentication stats interface <var>ifname</var></code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-clear-ip-bgp-peer"><code>clear ip bgp <var>peer</var></code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-clear-ip-bgp-peer-soft-in"><code>clear ip bgp <var>peer</var> soft in</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-clear-ip-prefix_002dlist"><code>clear ip prefix-list</code></a></td><td valign="top"><a href="#Clear-counter-of-ip-prefix_002dlist">13.2.4 Clear counter of ip prefix-list</a></td></tr>
@@ -10695,6 +10780,8 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-no-auto_002dcost-reference_002dbandwidth"><code>no auto-cost reference-bandwidth</code></a></td><td valign="top"><a href="#OSPF-router">7.2 OSPF router</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-babel-authentication"><code>no babel authentication</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-babel-authentication-mode-authmode-key_002dchain-keychain"><code>no babel authentication mode <var>authmode</var> key-chain <var>keychain</var></code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-babel-authentication-rx_002drequired"><code>no babel authentication rx-required</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-babel-diversity"><code>no babel diversity</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-babel-split_002dhorizon"><code>no babel split-horizon</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-bandwidth-_003c1_002d10000000_003e"><code>no bandwidth &lt;1-10000000&gt;</code></a></td><td valign="top"><a href="#Interface-Commands">4.2 Interface Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-banner-motd"><code>no banner motd</code></a></td><td valign="top"><a href="#Basic-Config-Commands">3.1.1 Basic Config Commands</a></td></tr>
@@ -10924,10 +11011,17 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-set-weight-weight"><code>set weight <var>weight</var></code></a></td><td valign="top"><a href="#Route-Map-Set-Command">14.3 Route Map Set Command</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-babel-authentication-memory"><code>show babel authentication memory</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-babel-authentication-stats"><code>show babel authentication stats</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-authentication-stats-interface"><code>show babel authentication stats interface</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-authentication-stats-interface-ifname"><code>show babel authentication stats interface <var>ifname</var></code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-babel-interface"><code>show babel interface</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-interface-ifname"><code>show babel interface <var>ifname</var></code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-babel-neighbor"><code>show babel neighbor</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-babel-parameters"><code>show babel parameters</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-babel-route"><code>show babel route</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-route-A_002eB_002eC_002eD"><code>show babel route A.B.C.D</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-route-A_002eB_002eC_002eD_002fM"><code>show babel route A.B.C.D/M</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-route-X_003aX_003a_003aX_003aX"><code>show babel route X:X::X:X</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-route-X_003aX_003a_003aX_003aX_002fM"><code>show babel route X:X::X:X/M</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-crypto"><code>show crypto</code></a></td><td valign="top"><a href="#Terminal-Mode-Commands">3.2 Terminal Mode Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-debug"><code>show debug</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-debugging-ospf"><code>show debugging ospf</code></a></td><td valign="top"><a href="#Debugging-OSPF">7.7 Debugging OSPF</a></td></tr>
@@ -11597,7 +11691,7 @@ and Address Family == IP version 6
 </tr></table>
 <h1>About This Document</h1>
 <p>
-  This document was generated by <em>Denis Ovsienko</em> on <em>July 5, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
+  This document was generated by <em>Denis Ovsienko</em> on <em>August 2, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
 </p>
 <p>
   The buttons in the navigation panels have the following meaning:
@@ -11699,7 +11793,7 @@ and Address Family == IP version 6
 <hr size="1">
 <p>
  <font size="-1">
-  This document was generated by <em>Denis Ovsienko</em> on <em>July 5, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
+  This document was generated by <em>Denis Ovsienko</em> on <em>August 2, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
  </font>
  <br>
 
