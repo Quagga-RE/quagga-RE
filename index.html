@@ -17,7 +17,7 @@ except that this permission notice may be stated in a translation
 approved by Kunihiro Ishiguro.
 
  -->
-<!-- Created on August 21, 2012 by texi2html 1.82
+<!-- Created on September 23, 2012 by texi2html 1.82
 texi2html was written by: 
             Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -716,11 +716,6 @@ use to turn off IPv6 support, to disable the compilation of specific
 daemons, and to enable SNMP support.
 </p>
 <dl compact="compact">
-<dt> &lsquo;<samp>--enable-guile</samp>&rsquo;</dt>
-<dd><p>Turn on compilation of the zebra-guile interpreter.  You will need the
-guile library to make this.  zebra-guile implementation is not yet
-finished.  So this option is only useful for zebra-guile developers.
-</p></dd>
 <dt> &lsquo;<samp>--disable-ipv6</samp>&rsquo;</dt>
 <dd><p>Turn off IPv6 related features and daemons.  Quagga configure script
 automatically detects IPv6 stack.  But sometimes you might want to
@@ -4762,13 +4757,15 @@ is able to perform routing for both IPv4 and IPv6.
 <table class="menu" border="0" cellspacing="0">
 <tr><td align="left" valign="top"><a href="#Configuring-babeld">9.1 Configuring babeld</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">          
 </td></tr>
-<tr><td align="left" valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">         
+<tr><td align="left" valign="top"><a href="#Babel-authentication">9.2 Babel authentication</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">        
 </td></tr>
-<tr><td align="left" valign="top"><a href="#Babel-redistribution">9.3 Babel redistribution</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">        
+<tr><td align="left" valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">         
 </td></tr>
-<tr><td align="left" valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">      
+<tr><td align="left" valign="top"><a href="#Babel-redistribution">9.4 Babel redistribution</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">        
 </td></tr>
-<tr><td align="left" valign="top"><a href="#Babel-debugging-commands">9.5 Babel debugging commands</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">    
+<tr><td align="left" valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">      
+</td></tr>
+<tr><td align="left" valign="top"><a href="#Babel-debugging-commands">9.6 Babel debugging commands</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">    
 </td></tr>
 </table>
 
@@ -4776,7 +4773,7 @@ is able to perform routing for both IPv4 and IPv6.
 <a name="Configuring-babeld"></a>
 <table cellpadding="1" cellspacing="1" border="0">
 <tr><td valign="middle" align="left">[<a href="#Babel" title="Previous section in reading order"> &lt; </a>]</td>
-<td valign="middle" align="left">[<a href="#Babel-configuration" title="Next section in reading order"> &gt; </a>]</td>
+<td valign="middle" align="left">[<a href="#Babel-authentication" title="Next section in reading order"> &gt; </a>]</td>
 <td valign="middle" align="left"> &nbsp; </td>
 <td valign="middle" align="left">[<a href="#Babel" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
 <td valign="middle" align="left">[<a href="#Babel" title="Up section"> Up </a>]</td>
@@ -4804,9 +4801,64 @@ must be too.
 &lsquo;<tt>babeld.conf</tt>&rsquo;.
 </p>
 <hr size="6">
-<a name="Babel-configuration"></a>
+<a name="Babel-authentication"></a>
 <table cellpadding="1" cellspacing="1" border="0">
 <tr><td valign="middle" align="left">[<a href="#Configuring-babeld" title="Previous section in reading order"> &lt; </a>]</td>
+<td valign="middle" align="left">[<a href="#Babel-configuration" title="Next section in reading order"> &gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="#Babel" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
+<td valign="middle" align="left">[<a href="#Babel" title="Up section"> Up </a>]</td>
+<td valign="middle" align="left">[<a href="#BGP" title="Next chapter"> &gt;&gt; </a>]</td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left"> &nbsp; </td>
+<td valign="middle" align="left">[<a href="#Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[<a href="#Command-Index" title="Index">Index</a>]</td>
+<td valign="middle" align="left">[<a href="#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+<a name="Babel-authentication-1"></a>
+<h2 class="section">9.2 Babel authentication</h2>
+<p>Quagga babeld implements protocol packet authentication mechanism as defined in
+draft-ovsienko-babel-hmac-authentication (work in progress). This mechanism is
+implemented with the following set of parameters:
+</p><ul>
+<li>
+Supported hash algorithms: RIPEMD-160, SHA-256, SHA-384, SHA-512 and Whirlpool.
+</li><li>
+MaxDigestsIn: fixed to 4 at compile-time.
+</li><li>
+MaxDigestsOut: fixed to 4 at compile-time.
+</li><li>
+RxAuthRequired: is specific to each interface and can be changed through CLI or
+configuration file.
+</li><li>
+ANM Table: not retained across speaker restarts, can be retrieved and reset (all
+entries at once) in runtime.
+</li><li>
+ANM Timeout: is specific to the whole protocol instance, has a default value of
+300 and can be changed through CLI or configuration file.
+</li><li>
+Ordering of items within each interface&rsquo;s list of CSAs: arbitrary as set by
+operator.
+</li><li>
+Ordering of items within each KeyChain list: fixed to the sort order of
+LocalKeyID. LocalKeyID must be unique within each KeyChain list.
+</li><li>
+Multiple link-local IPv6 addresses per an interface: not supported.
+</li><li>
+TS/PC number updates method: configured for the whole protocol instance through
+CLI or configuration file to one of two following methods. The default method
+is based on monotonic UNIX time and provides a TS/PC number strictly increasing
+across UNIX epoch. Another, optional, method stands for the TS/PC number
+counting outgoing packets as long as babeld keeps running.
+</li></ul>
+
+<hr size="6">
+<a name="Babel-configuration"></a>
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="#Babel-authentication" title="Previous section in reading order"> &lt; </a>]</td>
 <td valign="middle" align="left">[<a href="#Babel-redistribution" title="Next section in reading order"> &gt; </a>]</td>
 <td valign="middle" align="left"> &nbsp; </td>
 <td valign="middle" align="left">[<a href="#Babel" title="Beginning of this chapter or previous chapter"> &lt;&lt; </a>]</td>
@@ -4822,7 +4874,7 @@ must be too.
 <td valign="middle" align="left">[<a href="#SEC_About" title="About (help)"> ? </a>]</td>
 </tr></table>
 <a name="Babel-configuration-1"></a>
-<h2 class="section">9.2 Babel configuration</h2>
+<h2 class="section">9.3 Babel configuration</h2>
 
 <dl>
 <dt><a name="index-router-babel"></a><u>Command:</u> <b>router babel</b></dt>
@@ -5030,7 +5082,7 @@ Packet Counter wraps.
 <td valign="middle" align="left">[<a href="#SEC_About" title="About (help)"> ? </a>]</td>
 </tr></table>
 <a name="Babel-redistribution-1"></a>
-<h2 class="section">9.3 Babel redistribution</h2>
+<h2 class="section">9.4 Babel redistribution</h2>
 
 <dl>
 <dt><a name="index-redistribute-kind"></a><u>Babel command:</u> <b>redistribute <var>kind</var></b></dt>
@@ -5057,7 +5109,7 @@ Packet Counter wraps.
 <td valign="middle" align="left">[<a href="#SEC_About" title="About (help)"> ? </a>]</td>
 </tr></table>
 <a name="Show-Babel-information-1"></a>
-<h2 class="section">9.4 Show Babel information</h2>
+<h2 class="section">9.5 Show Babel information</h2>
 
 <dl>
 <dt><a name="index-show-babel-route"></a><u>Command:</u> <b>show babel route</b></dt>
@@ -5120,7 +5172,7 @@ operating in &quot;NVRAM-less wrap counter&quot; TS mode.
 <td valign="middle" align="left">[<a href="#SEC_About" title="About (help)"> ? </a>]</td>
 </tr></table>
 <a name="Babel-debugging-commands-1"></a>
-<h2 class="section">9.5 Babel debugging commands</h2>
+<h2 class="section">9.6 Babel debugging commands</h2>
 
 <dl>
 <dt><a name="index-debug-babel-kind"></a><u>Babel Command:</u> <b>debug babel <var>kind</var></b></dt>
@@ -10467,7 +10519,7 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-aggregate_002daddress-A_002eB_002eC_002eD_002fM"><code>aggregate-address <var>A.B.C.D/M</var></code></a></td><td valign="top"><a href="#Route-Aggregation">10.3.2 Route Aggregation</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-aggregate_002daddress-A_002eB_002eC_002eD_002fM-as_002dset"><code>aggregate-address <var>A.B.C.D/M</var> as-set</code></a></td><td valign="top"><a href="#Route-Aggregation">10.3.2 Route Aggregation</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-aggregate_002daddress-A_002eB_002eC_002eD_002fM-summary_002donly"><code>aggregate-address <var>A.B.C.D/M</var> summary-only</code></a></td><td valign="top"><a href="#Route-Aggregation">10.3.2 Route Aggregation</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-anm_002dtimeout-_003c5_002d4294967295_003e"><code>anm-timeout &lt;5-4294967295&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-anm_002dtimeout-_003c5_002d4294967295_003e"><code>anm-timeout &lt;5-4294967295&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-area-_003c0_002d4294967295_003e-authentication"><code>area &lt;0-4294967295&gt; authentication</code></a></td><td valign="top"><a href="#OSPF-area">7.3 OSPF area</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-area-_003c0_002d4294967295_003e-authentication-message_002ddigest"><code>area &lt;0-4294967295&gt; authentication message-digest</code></a></td><td valign="top"><a href="#OSPF-area">7.3 OSPF area</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-area-_003c0_002d4294967295_003e-export_002dlist-NAME"><code>area &lt;0-4294967295&gt; export-list NAME</code></a></td><td valign="top"><a href="#OSPF-area">7.3 OSPF area</a></td></tr>
@@ -10496,21 +10548,21 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-auto_002dcost-reference_002dbandwidth-_003c1_002d4294967_003e"><code>auto-cost reference-bandwidth &lt;1-4294967&gt;</code></a></td><td valign="top"><a href="#OSPF-router">7.2 OSPF router</a></td></tr>
 <tr><td colspan="3"> <hr></td></tr>
 <tr><th><a name="Command-Index-1_fn_letter-B">B</a></th><td></td><td></td></tr>
-<tr><td></td><td valign="top"><a href="#index-babel-authentication-mode-authmode-key_002dchain-keychain"><code>babel authentication mode <var>authmode</var> key-chain <var>keychain</var></code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-babel-authentication-rx_002drequired"><code>babel authentication rx-required</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-babel-channel-_003c1_002d254_003e"><code>babel channel &lt;1-254&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-babel-channel-interfering"><code>babel channel interfering</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-babel-channel-noninterfering"><code>babel channel noninterfering</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-babel-diversity"><code>babel diversity</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-babel-diversity_002dfactor-_003c1_002d256_003e"><code>babel diversity-factor &lt;1-256&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-babel-hello_002dinterval-_003c20_002d655340_003e"><code>babel hello-interval &lt;20-655340&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-babel-resend_002ddelay-_003c20_002d655340_003e"><code>babel resend-delay &lt;20-655340&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-babel-resend_002ddelay-_003c20_002d655340_003e-1"><code>babel resend-delay &lt;20-655340&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-babel-rxcost-_003c1_002d65534_003e"><code>babel rxcost &lt;1-65534&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-babel-split_002dhorizon"><code>babel split-horizon</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-babel-update_002dinterval-_003c20_002d655340_003e"><code>babel update-interval &lt;20-655340&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-babel-wired"><code>babel wired</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-babel-wireless"><code>babel wireless</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-authentication-mode-authmode-key_002dchain-keychain"><code>babel authentication mode <var>authmode</var> key-chain <var>keychain</var></code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-authentication-rx_002drequired"><code>babel authentication rx-required</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-channel-_003c1_002d254_003e"><code>babel channel &lt;1-254&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-channel-interfering"><code>babel channel interfering</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-channel-noninterfering"><code>babel channel noninterfering</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-diversity"><code>babel diversity</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-diversity_002dfactor-_003c1_002d256_003e"><code>babel diversity-factor &lt;1-256&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-hello_002dinterval-_003c20_002d655340_003e"><code>babel hello-interval &lt;20-655340&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-resend_002ddelay-_003c20_002d655340_003e"><code>babel resend-delay &lt;20-655340&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-resend_002ddelay-_003c20_002d655340_003e-1"><code>babel resend-delay &lt;20-655340&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-rxcost-_003c1_002d65534_003e"><code>babel rxcost &lt;1-65534&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-split_002dhorizon"><code>babel split-horizon</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-update_002dinterval-_003c20_002d655340_003e"><code>babel update-interval &lt;20-655340&gt;</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-wired"><code>babel wired</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-babel-wireless"><code>babel wireless</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-bandwidth-_003c1_002d10000000_003e"><code>bandwidth &lt;1-10000000&gt;</code></a></td><td valign="top"><a href="#Interface-Commands">4.2 Interface Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-banner-motd-default"><code>banner motd default</code></a></td><td valign="top"><a href="#Basic-Config-Commands">3.1.1 Basic Config Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-bgp-bestpath-as_002dpath-confed"><code>bgp bestpath as-path confed</code></a></td><td valign="top"><a href="#BGP-decision-process">10.2.2 BGP decision process</a></td></tr>
@@ -10524,10 +10576,10 @@ and Address Family == IP version 6
 <tr><th><a name="Command-Index-1_fn_letter-C">C</a></th><td></td><td></td></tr>
 <tr><td></td><td valign="top"><a href="#index-call-name"><code>call <var>name</var></code></a></td><td valign="top"><a href="#Route-Map-Call-Command">14.4 Route Map Call Command</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-call-WORD"><code>call <var>WORD</var></code></a></td><td valign="top"><a href="#Commands-for-configuring-a-Route-Server">11.2 Commands for configuring a Route Server</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-clear-babel-authentication-memory"><code>clear babel authentication memory</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-clear-babel-authentication-stats"><code>clear babel authentication stats</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-clear-babel-authentication-stats-interface"><code>clear babel authentication stats interface</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-clear-babel-authentication-stats-interface-ifname"><code>clear babel authentication stats interface <var>ifname</var></code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-clear-babel-authentication-memory"><code>clear babel authentication memory</code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-clear-babel-authentication-stats"><code>clear babel authentication stats</code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-clear-babel-authentication-stats-interface"><code>clear babel authentication stats interface</code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-clear-babel-authentication-stats-interface-ifname"><code>clear babel authentication stats interface <var>ifname</var></code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-clear-ip-bgp-peer"><code>clear ip bgp <var>peer</var></code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-clear-ip-bgp-peer-soft-in"><code>clear ip bgp <var>peer</var> soft in</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-clear-ip-prefix_002dlist"><code>clear ip prefix-list</code></a></td><td valign="top"><a href="#Clear-counter-of-ip-prefix_002dlist">13.2.4 Clear counter of ip prefix-list</a></td></tr>
@@ -10538,7 +10590,7 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-continue-N"><code>continue <var>N</var></code></a></td><td valign="top"><a href="#Route-Map-Exit-Action-Command">14.5 Route Map Exit Action Command</a></td></tr>
 <tr><td colspan="3"> <hr></td></tr>
 <tr><th><a name="Command-Index-1_fn_letter-D">D</a></th><td></td><td></td></tr>
-<tr><td></td><td valign="top"><a href="#index-debug-babel-kind"><code>debug babel <var>kind</var></code></a></td><td valign="top"><a href="#Babel-debugging-commands">9.5 Babel debugging commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-debug-babel-kind"><code>debug babel <var>kind</var></code></a></td><td valign="top"><a href="#Babel-debugging-commands">9.6 Babel debugging commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-debug-event"><code>debug event</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-debug-keepalive"><code>debug keepalive</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-debug-ospf-ism"><code>debug ospf ism</code></a></td><td valign="top"><a href="#Debugging-OSPF">7.7 Debugging OSPF</a></td></tr>
@@ -10749,11 +10801,11 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-network-a_002eb_002ec_002ed_002fm-area-a_002eb_002ec_002ed"><code>network <var>a.b.c.d/m</var> area <var>a.b.c.d</var></code></a></td><td valign="top"><a href="#OSPF-router">7.2 OSPF router</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-network-ifname"><code>network <var>ifname</var></code></a></td><td valign="top"><a href="#RIP-Configuration">5.2 RIP Configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-network-ifname-1"><code>network <var>ifname</var></code></a></td><td valign="top"><a href="#ripngd-Configuration">6.2 ripngd Configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-network-ifname-2"><code>network <var>ifname</var></code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-network-ifname-2"><code>network <var>ifname</var></code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-network-network"><code>network <var>network</var></code></a></td><td valign="top"><a href="#RIP-Configuration">5.2 RIP Configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-network-network-1"><code>network <var>network</var></code></a></td><td valign="top"><a href="#ripngd-Configuration">6.2 ripngd Configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-aggregate_002daddress-A_002eB_002eC_002eD_002fM"><code>no aggregate-address <var>A.B.C.D/M</var></code></a></td><td valign="top"><a href="#Route-Aggregation">10.3.2 Route Aggregation</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-anm_002dtimeout-_005b_003c5_002d4294967295_003e_005d"><code>no anm-timeout [&lt;5-4294967295&gt;]</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-anm_002dtimeout-_005b_003c5_002d4294967295_003e_005d"><code>no anm-timeout [&lt;5-4294967295&gt;]</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-area-_003c0_002d4294967295_003e-authentication"><code>no area &lt;0-4294967295&gt; authentication</code></a></td><td valign="top"><a href="#OSPF-area">7.3 OSPF area</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-area-_003c0_002d4294967295_003e-export_002dlist-NAME"><code>no area &lt;0-4294967295&gt; export-list NAME</code></a></td><td valign="top"><a href="#OSPF-area">7.3 OSPF area</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-area-_003c0_002d4294967295_003e-filter_002dlist-prefix-NAME-in"><code>no area &lt;0-4294967295&gt; filter-list prefix NAME in</code></a></td><td valign="top"><a href="#OSPF-area">7.3 OSPF area</a></td></tr>
@@ -10778,15 +10830,15 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-no-area-a_002eb_002ec_002ed-stub-no_002dsummary"><code>no area <var>a.b.c.d</var> stub no-summary</code></a></td><td valign="top"><a href="#OSPF-area">7.3 OSPF area</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-area-a_002eb_002ec_002ed-virtual_002dlink-a_002eb_002ec_002ed"><code>no area <var>a.b.c.d</var> virtual-link <var>a.b.c.d</var></code></a></td><td valign="top"><a href="#OSPF-area">7.3 OSPF area</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-auto_002dcost-reference_002dbandwidth"><code>no auto-cost reference-bandwidth</code></a></td><td valign="top"><a href="#OSPF-router">7.2 OSPF router</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-babel-authentication"><code>no babel authentication</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-babel-authentication-mode-authmode-key_002dchain-keychain"><code>no babel authentication mode <var>authmode</var> key-chain <var>keychain</var></code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-babel-authentication-rx_002drequired"><code>no babel authentication rx-required</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-babel-diversity"><code>no babel diversity</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-babel-split_002dhorizon"><code>no babel split-horizon</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-babel-authentication"><code>no babel authentication</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-babel-authentication-mode-authmode-key_002dchain-keychain"><code>no babel authentication mode <var>authmode</var> key-chain <var>keychain</var></code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-babel-authentication-rx_002drequired"><code>no babel authentication rx-required</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-babel-diversity"><code>no babel diversity</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-babel-split_002dhorizon"><code>no babel split-horizon</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-bandwidth-_003c1_002d10000000_003e"><code>no bandwidth &lt;1-10000000&gt;</code></a></td><td valign="top"><a href="#Interface-Commands">4.2 Interface Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-banner-motd"><code>no banner motd</code></a></td><td valign="top"><a href="#Basic-Config-Commands">3.1.1 Basic Config Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-bgp-multiple_002dinstance"><code>no bgp multiple-instance</code></a></td><td valign="top"><a href="#Multiple-instance">10.13.1 Multiple instance</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-debug-babel-kind"><code>no debug babel <var>kind</var></code></a></td><td valign="top"><a href="#Babel-debugging-commands">9.5 Babel debugging commands</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-debug-babel-kind"><code>no debug babel <var>kind</var></code></a></td><td valign="top"><a href="#Babel-debugging-commands">9.6 Babel debugging commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-debug-event"><code>no debug event</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-debug-keepalive"><code>no debug keepalive</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-debug-ospf-ism"><code>no debug ospf ism</code></a></td><td valign="top"><a href="#Debugging-OSPF">7.7 Debugging OSPF</a></td></tr>
@@ -10891,7 +10943,7 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-no-network-a_002eb_002ec_002ed_002fm-area-_003c0_002d4294967295_003e"><code>no network <var>a.b.c.d/m</var> area <var>&lt;0-4294967295&gt;</var></code></a></td><td valign="top"><a href="#OSPF-router">7.2 OSPF router</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-network-a_002eb_002ec_002ed_002fm-area-a_002eb_002ec_002ed"><code>no network <var>a.b.c.d/m</var> area <var>a.b.c.d</var></code></a></td><td valign="top"><a href="#OSPF-router">7.2 OSPF router</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-network-ifname"><code>no network <var>ifname</var></code></a></td><td valign="top"><a href="#RIP-Configuration">5.2 RIP Configuration</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-network-ifname-1"><code>no network <var>ifname</var></code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-network-ifname-1"><code>no network <var>ifname</var></code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-network-network"><code>no network <var>network</var></code></a></td><td valign="top"><a href="#RIP-Configuration">5.2 RIP Configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-ospf-abr_002dtype-type"><code>no ospf abr-type <var>type</var></code></a></td><td valign="top"><a href="#OSPF-router">7.2 OSPF router</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-ospf-rfc1583compatibility"><code>no ospf rfc1583compatibility</code></a></td><td valign="top"><a href="#OSPF-router">7.2 OSPF router</a></td></tr>
@@ -10902,13 +10954,13 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-no-redistribute-bgp"><code>no redistribute bgp</code></a></td><td valign="top"><a href="#How-to-Announce-RIP-route">5.4 How to Announce RIP route</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-redistribute-connected"><code>no redistribute connected</code></a></td><td valign="top"><a href="#How-to-Announce-RIP-route">5.4 How to Announce RIP route</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-redistribute-kernel"><code>no redistribute kernel</code></a></td><td valign="top"><a href="#How-to-Announce-RIP-route">5.4 How to Announce RIP route</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-redistribute-kind"><code>no redistribute <var>kind</var></code></a></td><td valign="top"><a href="#Babel-redistribution">9.3 Babel redistribution</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-redistribute-kind"><code>no redistribute <var>kind</var></code></a></td><td valign="top"><a href="#Babel-redistribution">9.4 Babel redistribution</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-redistribute-maximum_002dprefix"><code>no redistribute maximum-prefix</code></a></td><td valign="top"><a href="#Redistribute-routes-to-OSPF">7.5 Redistribute routes to OSPF</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-redistribute-ospf"><code>no redistribute ospf</code></a></td><td valign="top"><a href="#How-to-Announce-RIP-route">5.4 How to Announce RIP route</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-redistribute-static"><code>no redistribute static</code></a></td><td valign="top"><a href="#How-to-Announce-RIP-route">5.4 How to Announce RIP route</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-relaxed_002drecv_002dsize_002dchecks"><code>no relaxed-recv-size-checks</code></a></td><td valign="top"><a href="#RIP-Configuration">5.2 RIP Configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-route-a_002eb_002ec_002ed_002fm"><code>no route <var>a.b.c.d/m</var></code></a></td><td valign="top"><a href="#How-to-Announce-RIP-route">5.4 How to Announce RIP route</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-router-babel"><code>no router babel</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-router-babel"><code>no router babel</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-router-bgp-asn"><code>no router bgp <var>asn</var></code></a></td><td valign="top"><a href="#BGP-router">10.2 BGP router</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-router-ospf"><code>no router ospf</code></a></td><td valign="top"><a href="#OSPF-router">7.2 OSPF router</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-router-rip"><code>no router rip</code></a></td><td valign="top"><a href="#RIP-Configuration">5.2 RIP Configuration</a></td></tr>
@@ -10917,7 +10969,7 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-no-smux-peer-oid-password"><code>no smux peer <var>oid</var> <var>password</var></code></a></td><td valign="top"><a href="#MIB-and-command-reference">17.3 MIB and command reference</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-timers-basic"><code>no timers basic</code></a></td><td valign="top"><a href="#RIP-Timers">5.10 RIP Timers</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-timers-throttle-spf"><code>no timers throttle spf</code></a></td><td valign="top"><a href="#OSPF-router">7.2 OSPF router</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-ts_002dbase-_005b_0028zero_007cunixtime_0029_005d"><code>no ts-base [(zero|unixtime)]</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-ts_002dbase-_005b_0028zero_007cunixtime_0029_005d"><code>no ts-base [(zero|unixtime)]</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-version"><code>no version</code></a></td><td valign="top"><a href="#RIP-Version-Control">5.3 RIP Version Control</a></td></tr>
 <tr><td colspan="3"> <hr></td></tr>
 <tr><th><a name="Command-Index-1_fn_letter-O">O</a></th><td></td><td></td></tr>
@@ -10955,7 +11007,7 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-redistribute-kernel-1"><code>redistribute kernel</code></a></td><td valign="top"><a href="#Redistribute-to-BGP">10.3.3 Redistribute to BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-redistribute-kernel-metric-_003c0_002d16_003e"><code>redistribute kernel metric &lt;0-16&gt;</code></a></td><td valign="top"><a href="#How-to-Announce-RIP-route">5.4 How to Announce RIP route</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-redistribute-kernel-route_002dmap-route_002dmap"><code>redistribute kernel route-map <var>route-map</var></code></a></td><td valign="top"><a href="#How-to-Announce-RIP-route">5.4 How to Announce RIP route</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-redistribute-kind"><code>redistribute <var>kind</var></code></a></td><td valign="top"><a href="#Babel-redistribution">9.3 Babel redistribution</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-redistribute-kind"><code>redistribute <var>kind</var></code></a></td><td valign="top"><a href="#Babel-redistribution">9.4 Babel redistribution</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-redistribute-maximum_002dprefix-HARDLIMIT"><code>redistribute maximum-prefix <var>HARDLIMIT</var></code></a></td><td valign="top"><a href="#Redistribute-routes-to-OSPF">7.5 Redistribute routes to OSPF</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-redistribute-maximum_002dprefix-HARDLIMIT-SOFTLIMIT"><code>redistribute maximum-prefix <var>HARDLIMIT</var> <var>SOFTLIMIT</var></code></a></td><td valign="top"><a href="#Redistribute-routes-to-OSPF">7.5 Redistribute routes to OSPF</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-redistribute-maximum_002dprefix-HARDLIMIT-SOFTLIMIT-warning_002donly"><code>redistribute maximum-prefix <var>HARDLIMIT</var> <var>SOFTLIMIT</var> warning-only</code></a></td><td valign="top"><a href="#Redistribute-routes-to-OSPF">7.5 Redistribute routes to OSPF</a></td></tr>
@@ -10975,7 +11027,7 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-route-a_002eb_002ec_002ed_002fm"><code>route <var>a.b.c.d/m</var></code></a></td><td valign="top"><a href="#How-to-Announce-RIP-route">5.4 How to Announce RIP route</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-route-network"><code>route <var>network</var></code></a></td><td valign="top"><a href="#ripngd-Configuration">6.2 ripngd Configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-route_002dmap-route_002dmap_002dname-_0028permit_007cdeny_0029-order"><code>route-map <var>route-map-name</var> (permit|deny) <var>order</var></code></a></td><td valign="top"><a href="#Route-Map-Command">14.1 Route Map Command</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-router-babel"><code>router babel</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-router-babel"><code>router babel</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-router-bgp-as_002dnumber"><code>router bgp <var>as-number</var></code></a></td><td valign="top"><a href="#BGP-instance-and-view">10.13.2 BGP instance and view</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-router-bgp-as_002dnumber-view-name"><code>router bgp <var>as-number</var> view <var>name</var></code></a></td><td valign="top"><a href="#BGP-instance-and-view">10.13.2 BGP instance and view</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-router-bgp-asn"><code>router bgp <var>asn</var></code></a></td><td valign="top"><a href="#BGP-router">10.2 BGP router</a></td></tr>
@@ -11009,19 +11061,19 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-set-metric-metric"><code>set metric <var>metric</var></code></a></td><td valign="top"><a href="#Route-Map-Set-Command">14.3 Route Map Set Command</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-set-src-address"><code>set src <var>address</var></code></a></td><td valign="top"><a href="#zebra-Route-Filtering">4.4 zebra Route Filtering</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-set-weight-weight"><code>set weight <var>weight</var></code></a></td><td valign="top"><a href="#Route-Map-Set-Command">14.3 Route Map Set Command</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-show-babel-authentication-memory"><code>show babel authentication memory</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-show-babel-authentication-stats"><code>show babel authentication stats</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-show-babel-authentication-stats-interface"><code>show babel authentication stats interface</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-show-babel-authentication-stats-interface-ifname"><code>show babel authentication stats interface <var>ifname</var></code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-show-babel-interface"><code>show babel interface</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-show-babel-interface-ifname"><code>show babel interface <var>ifname</var></code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-show-babel-neighbor"><code>show babel neighbor</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-show-babel-parameters"><code>show babel parameters</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-show-babel-route"><code>show babel route</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-show-babel-route-A_002eB_002eC_002eD"><code>show babel route A.B.C.D</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-show-babel-route-A_002eB_002eC_002eD_002fM"><code>show babel route A.B.C.D/M</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-show-babel-route-X_003aX_003a_003aX_003aX"><code>show babel route X:X::X:X</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-show-babel-route-X_003aX_003a_003aX_003aX_002fM"><code>show babel route X:X::X:X/M</code></a></td><td valign="top"><a href="#Show-Babel-information">9.4 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-authentication-memory"><code>show babel authentication memory</code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-authentication-stats"><code>show babel authentication stats</code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-authentication-stats-interface"><code>show babel authentication stats interface</code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-authentication-stats-interface-ifname"><code>show babel authentication stats interface <var>ifname</var></code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-interface"><code>show babel interface</code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-interface-ifname"><code>show babel interface <var>ifname</var></code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-neighbor"><code>show babel neighbor</code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-parameters"><code>show babel parameters</code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-route"><code>show babel route</code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-route-A_002eB_002eC_002eD"><code>show babel route A.B.C.D</code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-route-A_002eB_002eC_002eD_002fM"><code>show babel route A.B.C.D/M</code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-route-X_003aX_003a_003aX_003aX"><code>show babel route X:X::X:X</code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-babel-route-X_003aX_003a_003aX_003aX_002fM"><code>show babel route X:X::X:X/M</code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-crypto"><code>show crypto</code></a></td><td valign="top"><a href="#Terminal-Mode-Commands">3.2 Terminal Mode Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-debug"><code>show debug</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-debugging-ospf"><code>show debugging ospf</code></a></td><td valign="top"><a href="#Debugging-OSPF">7.7 Debugging OSPF</a></td></tr>
@@ -11104,7 +11156,7 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-terminal-length-_003c0_002d512_003e"><code>terminal length <var>&lt;0-512&gt;</var></code></a></td><td valign="top"><a href="#Terminal-Mode-Commands">3.2 Terminal Mode Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-timers-basic-update-timeout-garbage"><code>timers basic <var>update</var> <var>timeout</var> <var>garbage</var></code></a></td><td valign="top"><a href="#RIP-Timers">5.10 RIP Timers</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-timers-throttle-spf-delay-initial_002dholdtime-max_002dholdtime"><code>timers throttle spf <var>delay</var> <var>initial-holdtime</var> <var>max-holdtime</var></code></a></td><td valign="top"><a href="#OSPF-router">7.2 OSPF router</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-ts_002dbase-_0028zero_007cunixtime_0029"><code>ts-base (zero|unixtime)</code></a></td><td valign="top"><a href="#Babel-configuration">9.2 Babel configuration</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-ts_002dbase-_0028zero_007cunixtime_0029"><code>ts-base (zero|unixtime)</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
 <tr><td colspan="3"> <hr></td></tr>
 <tr><th><a name="Command-Index-1_fn_letter-U">U</a></th><td></td><td></td></tr>
 <tr><td></td><td valign="top"><a href="#index-username-username-nopassword"><code>username <var>username</var> nopassword</code></a></td><td valign="top"><a href="#VTY-shell-username">12.1 VTY shell username</a></td></tr>
@@ -11544,10 +11596,11 @@ and Address Family == IP version 6
   <li><a name="toc-Babel-1" href="#Babel">9. Babel</a>
   <ul class="toc">
     <li><a name="toc-Configuring-babeld-1" href="#Configuring-babeld">9.1 Configuring babeld</a></li>
-    <li><a name="toc-Babel-configuration-1" href="#Babel-configuration">9.2 Babel configuration</a></li>
-    <li><a name="toc-Babel-redistribution-1" href="#Babel-redistribution">9.3 Babel redistribution</a></li>
-    <li><a name="toc-Show-Babel-information-1" href="#Show-Babel-information">9.4 Show Babel information</a></li>
-    <li><a name="toc-Babel-debugging-commands-1" href="#Babel-debugging-commands">9.5 Babel debugging commands</a></li>
+    <li><a name="toc-Babel-authentication-1" href="#Babel-authentication">9.2 Babel authentication</a></li>
+    <li><a name="toc-Babel-configuration-1" href="#Babel-configuration">9.3 Babel configuration</a></li>
+    <li><a name="toc-Babel-redistribution-1" href="#Babel-redistribution">9.4 Babel redistribution</a></li>
+    <li><a name="toc-Show-Babel-information-1" href="#Show-Babel-information">9.5 Show Babel information</a></li>
+    <li><a name="toc-Babel-debugging-commands-1" href="#Babel-debugging-commands">9.6 Babel debugging commands</a></li>
   </ul></li>
   <li><a name="toc-BGP-1" href="#BGP">10. BGP</a>
   <ul class="toc">
@@ -11691,7 +11744,7 @@ and Address Family == IP version 6
 </tr></table>
 <h1>About This Document</h1>
 <p>
-  This document was generated by <em>Denis Ovsienko</em> on <em>August 21, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
+  This document was generated by <em>Denis Ovsienko</em> on <em>September 23, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
 </p>
 <p>
   The buttons in the navigation panels have the following meaning:
@@ -11793,7 +11846,7 @@ and Address Family == IP version 6
 <hr size="1">
 <p>
  <font size="-1">
-  This document was generated by <em>Denis Ovsienko</em> on <em>August 21, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
+  This document was generated by <em>Denis Ovsienko</em> on <em>September 23, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
  </font>
  <br>
 
