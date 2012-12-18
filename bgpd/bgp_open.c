@@ -705,7 +705,7 @@ bgp_open_option_parse (struct peer *peer, u_char length)
   u_char error_data[BGP_MAX_PACKET_SIZE];
   struct stream *s = BGP_INPUT(peer);
   size_t end = stream_get_getp (s) + length;
-  int mp_capability;
+  int mp_capability = 0;
 
   ret = 0;
   error = error_data;
