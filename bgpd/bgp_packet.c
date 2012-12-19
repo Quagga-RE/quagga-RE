@@ -1453,22 +1453,17 @@ bgp_open_receive (struct peer *peer, bgp_size_t size)
 
   peer->v_keepalive = peer->v_holdtime / 3;
 
-  /* Open option part parse. */
-  if (optlen != 0) 
+  if (optlen == 0 && BGP_DEBUG (normal, NORMAL))
+    zlog_debug ("%s rcvd OPEN w/ OPTION parameter len: 0", peer->host);
+
+  /* Call the parser anyway to allow it assume default AFI/SAFI for the peer
+   * when the OPEN message contains no options. */
+  if ((ret = bgp_open_option_parse (peer, optlen)) < 0)
     {
-      if ((ret = bgp_open_option_parse (peer, optlen)) < 0)
-        {
-          bgp_notify_send (peer,
-                 BGP_NOTIFY_OPEN_ERR,
-                 BGP_NOTIFY_OPEN_UNACEP_HOLDTIME);
-	  return ret;
-        }
-    }
-  else
-    {
-      if (BGP_DEBUG (normal, NORMAL))
-	zlog_debug ("%s rcvd OPEN w/ OPTION parameter len: 0",
-		   peer->host);
+      bgp_notify_send (peer,
+             BGP_NOTIFY_OPEN_ERR,
+             BGP_NOTIFY_OPEN_UNACEP_HOLDTIME);
+      return ret;
     }
 
   /* Get sockname. */
