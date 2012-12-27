@@ -740,10 +740,24 @@ zlookup_read (void)
   return bnc;
 }
 
+static int
+zlookup_write_packet (const char *caller, int *socket, const u_char *data, const int nbytes)
+{
+  int ret;
+
+  if ((ret = writen (*socket, data, nbytes)) <= 0)
+    {
+      zlog_err ("writing zlookup packet failed in %s, %s", caller,
+                ret == 0 ? "connection closed" : "write error");
+      close (*socket);
+      *socket = -1;
+    }
+  return ret;
+}
+
 struct bgp_nexthop_cache *
 zlookup_query (struct in_addr addr)
 {
-  int ret;
   struct stream *s;
 
   /* Check socket. */
@@ -757,23 +771,8 @@ zlookup_query (struct in_addr addr)
   
   stream_putw_at (s, 0, stream_get_endp (s));
   
-  ret = writen (zlookup->sock, s->data, stream_get_endp (s));
-  if (ret < 0)
-    {
-      zlog_err ("can't write to zlookup->sock");
-      close (zlookup->sock);
-      zlookup->sock = -1;
-      return NULL;
-    }
-  if (ret == 0)
-    {
-      zlog_err ("zlookup->sock connection closed");
-      close (zlookup->sock);
-      zlookup->sock = -1;
-      return NULL;
-    }
-
-  return zlookup_read ();
+  return zlookup_write_packet (__func__, &zlookup->sock, s->data, stream_get_endp (s)) <= 0 ?
+    NULL : zlookup_read ();
 }
 
 #ifdef HAVE_IPV6
@@ -857,7 +856,6 @@ zlookup_read_ipv6 (void)
 struct bgp_nexthop_cache *
 zlookup_query_ipv6 (struct in6_addr *addr)
 {
-  int ret;
   struct stream *s;
 
   /* Check socket. */
@@ -869,24 +867,9 @@ zlookup_query_ipv6 (struct in6_addr *addr)
   zclient_create_header (s, ZEBRA_IPV6_NEXTHOP_LOOKUP);
   stream_put (s, addr, 16);
   stream_putw_at (s, 0, stream_get_endp (s));
-  
-  ret = writen (zlookup->sock, s->data, stream_get_endp (s));
-  if (ret < 0)
-    {
-      zlog_err ("can't write to zlookup->sock");
-      close (zlookup->sock);
-      zlookup->sock = -1;
-      return NULL;
-    }
-  if (ret == 0)
-    {
-      zlog_err ("zlookup->sock connection closed");
-      close (zlookup->sock);
-      zlookup->sock = -1;
-      return NULL;
-    }
 
-  return zlookup_read_ipv6 ();
+  return zlookup_write_packet (__func__, &zlookup->sock, s->data, stream_get_endp (s)) <= 0 ?
+    NULL : zlookup_read_ipv6();
 }
 #endif /* HAVE_IPV6 */
 
@@ -895,7 +878,6 @@ bgp_import_check (struct prefix *p, u_int32_t *igpmetric,
                   struct in_addr *igpnexthop)
 {
   struct stream *s;
-  int ret;
   u_int16_t length, command;
   u_char version, marker;
   int nbytes;
@@ -923,23 +905,8 @@ bgp_import_check (struct prefix *p, u_int32_t *igpmetric,
   
   stream_putw_at (s, 0, stream_get_endp (s));
   
-  /* Write the packet. */
-  ret = writen (zlookup->sock, s->data, stream_get_endp (s));
-
-  if (ret < 0)
-    {
-      zlog_err ("can't write to zlookup->sock");
-      close (zlookup->sock);
-      zlookup->sock = -1;
-      return 1;
-    }
-  if (ret == 0)
-    {
-      zlog_err ("zlookup->sock connection closed");
-      close (zlookup->sock);
-      zlookup->sock = -1;
-      return 1;
-    }
+  if (zlookup_write_packet (__func__, &zlookup->sock, s->data, stream_get_endp (s)) <= 0)
+    return 1;
 
   /* Get result. */
   stream_reset (s);
