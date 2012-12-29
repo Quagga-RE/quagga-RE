@@ -986,6 +986,8 @@ specific to particular protocol subsystems:
 @code{updates [in|out]}
 @item
 @code{zebra}
+@item
+@code{nexthop}
 @end itemize
 @end deffn
 
