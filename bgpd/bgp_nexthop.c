@@ -422,6 +422,9 @@ bgp_scan (afi_t afi, safi_t safi)
   if (bgp == NULL)
     return;
 
+  if (BGP_DEBUG (events, EVENTS))
+    zlog_debug ("scanning IPv%s Unicast routing tables", afi == AFI_IP ? "4" : "6");
+
   /* Maximum prefix check */
   for (ALL_LIST_ELEMENTS (bgp->peer, node, nnode, peer))
     {
@@ -489,14 +492,6 @@ bgp_scan (afi_t afi, safi_t safi)
     }
 
   bgp_nexthop_cache_reset (bnct_inactive (afi));
-
-  if (BGP_DEBUG (events, EVENTS))
-    {
-      if (afi == AFI_IP)
-	zlog_debug ("scanning IPv4 Unicast routing tables");
-      else if (afi == AFI_IP6)
-	zlog_debug ("scanning IPv6 Unicast routing tables");
-    }
 }
 
 /* BGP scan thread.  This thread check nexthop reachability. */
