@@ -960,25 +960,33 @@ Display paths suppressed due to dampening
 Display flap statistics of routes
 @end deffn
 
-@deffn {Command} {show debug} {}
+@deffn {Command} {show debugging bgp} {}
+Display which of the BGP debug modes (see below) are turned on.
 @end deffn
 
-@deffn {Command} {debug event} {}
-@end deffn
-
-@deffn {Command} {debug update} {}
-@end deffn
-
-@deffn {Command} {debug keepalive} {}
-@end deffn
-
-@deffn {Command} {no debug event} {}
-@end deffn
-
-@deffn {Command} {no debug update} {}
-@end deffn
-
-@deffn {Command} {no debug keepalive} {}
+@deffn {Command} {debug bgp [@var{kind}]} {}
+@deffnx {Command} {no debug bgp [@var{kind}]} {}
+@deffnx {Command} {undebug bgp [@var{kind}]} {}
+Manage BGP debugging modes, either general (when the argument is missing) or
+specific to particular protocol subsystems:
+@itemize @bullet
+@item
+@code{as4 [segment]}
+@item
+@code{events}
+@item
+@code{filters}
+@item
+@code{fsm}
+@item
+@code{filters}
+@item
+@code{keepalives}
+@item
+@code{updates [in|out]}
+@item
+@code{zebra}
+@end itemize
 @end deffn
 
 @node Capability Negotiation
