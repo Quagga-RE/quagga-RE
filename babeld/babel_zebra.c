@@ -51,8 +51,8 @@ static struct {
     {BABEL_DEBUG_TIMEOUT, 1, "timeout"},
     {BABEL_DEBUG_IF,      1, "interface"},
     {BABEL_DEBUG_ROUTE,   1, "route"},
-    {BABEL_DEBUG_AUTH,    1, "authentication"},
-    {BABEL_DEBUG_ALL,     1, "all"},
+    {BABEL_DEBUG_AUTH,    2, "authentication"},
+    {BABEL_DEBUG_ALL,     2, "all"},
     {0, 0, NULL}
 };
 
