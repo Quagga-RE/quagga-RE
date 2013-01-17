@@ -79,8 +79,7 @@ void timeval_minus(struct timeval *d,
                    const struct timeval *s1, const struct timeval *s2);
 unsigned timeval_minus_msec(const struct timeval *s1, const struct timeval *s2)
     ATTRIBUTE ((pure));
-void timeval_add_msec(struct timeval *d,
-                      const struct timeval *s, const int msecs);
+void timeval_add_msec(struct timeval *d, const struct timeval *s, int msecs);
 void set_timeout (struct timeval *timeout, int msecs);
 int timeval_compare(const struct timeval *s1, const struct timeval *s2)
     ATTRIBUTE ((pure));

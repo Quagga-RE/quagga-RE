@@ -87,7 +87,7 @@ timeval_minus_msec(const struct timeval *s1, const struct timeval *s2)
 
 /* d = s + msecs */
 void
-timeval_add_msec(struct timeval *d, const struct timeval *s, const int msecs)
+timeval_add_msec(struct timeval *d, const struct timeval *s, int msecs)
 {
     int usecs;
     d->tv_sec = s->tv_sec + msecs / 1000;
