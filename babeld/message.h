@@ -47,7 +47,6 @@ THE SOFTWARE.
 
 
 extern unsigned short myseqno;
-extern struct timeval seqno_time;
 
 extern int broadcast_ihu;
 extern int split_horizon;
