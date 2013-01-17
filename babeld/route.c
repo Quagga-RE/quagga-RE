@@ -711,7 +711,7 @@ update_route_metric(struct babel_route *route)
 }
 
 /* Called whenever a neighbour's cost changes, to update the metric of
-   all routes through that neighbour.  Calls local_notify_neighbour. */
+   all routes through that neighbour. */
 void
 update_neighbour_metric(struct neighbour *neigh, int changed)
 {

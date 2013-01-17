@@ -108,8 +108,7 @@ find_neighbour(const unsigned char *address, struct interface *ifp)
     return neigh;
 }
 
-/* Recompute a neighbour's rxcost.  Return true if anything changed.
-   This does not call local_notify_neighbour, see update_neighbour_metric. */
+/* Recompute a neighbour's rxcost.  Return true if anything changed. */
 int
 update_neighbour(struct neighbour *neigh, int hello, int hello_interval)
 {
