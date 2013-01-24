@@ -657,7 +657,7 @@ zebra_router_id_update_read (struct stream *s, struct prefix *rid)
 /*  
  * The format of the message sent with type ZEBRA_INTERFACE_ADD or
  * ZEBRA_INTERFACE_DELETE from zebra to the client is:
- *     0                   1                   2                   3
+ *  0                   1                   2                   3
  *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
  * +-+-+-+-+-+-+-+-+
  * |   type        |
@@ -758,7 +758,7 @@ zebra_interface_state_read (struct stream *s)
 
 /* 
  * format of message for address additon is:
- *    0
+ *
  *  0 1 2 3 4 5 6 7
  * +-+-+-+-+-+-+-+-+
  * |   type        |  ZEBRA_INTERFACE_ADDRESS_ADD or
