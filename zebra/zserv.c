@@ -51,6 +51,8 @@ extern struct zebra_t zebrad;
 static void zebra_event (enum event event, int sock, struct zserv *client);
 
 extern struct zebra_privs_t zserv_privs;
+/* Temporary table to accumulate data between calls to zread_ipv4_rgate_verify(). */
+static struct route_table *vnhlist = NULL;
 
 static void zebra_client_close (struct zserv *client);
 
@@ -917,6 +919,201 @@ zread_ipv4_nexthop_lookup (struct zserv *client, u_short length)
   return zsend_ipv4_nexthop_lookup (client, addr);
 }
 
+/* Send the given list of prefixes that failed nexthop verification procedure
+ * to zclient (bgpd) using one or more ZEBRA_BGP_IPV4_RGATE_VERIFY messages.
+ *
+ *  0                   1                   2                   3
+ *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * |  More Follow  |      Number of Prefixes       |
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * |                         IPv4 prefix 1                         |
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * | PrefixLength1 |
+ * +---------------+
+ * :               :
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * |                         IPv4 prefix N                         |
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * | PrefixLengthN |
+ * +---------------+
+ *
+ * Note that the number of prefixes to be processed may be greater than the
+ * maximum size of a zebra protocol packet allows (see the definition of
+ * DESYNC_PFXS_PER_MSG macro). The More Follow flag is used to split the
+ * complete set into a series of subsets consisting of 0 or more items each, so
+ * that each subset is transmitted in a separate message with More Follow set
+ * to 0 in the last message and set to 1 in any preceding messages.
+ */
+static void
+zsend_ipv4_desync_prefixes (struct zserv *client, const struct prefix_ipv4 pfxlist[],
+                            const unsigned numpfx, const u_char morefollow)
+{
+  struct stream *s = client->obuf;
+  size_t i;
+
+  if (IS_ZEBRA_DEBUG_PACKET && IS_ZEBRA_DEBUG_SEND)
+    zlog_debug ("%s: sending %u %sprefixes", __func__, numpfx, morefollow ? "" : "last ");
+  stream_reset (s);
+  zserv_create_header (s, ZEBRA_BGP_IPV4_RGATE_VERIFY);
+  stream_putc (s, morefollow);
+  stream_putw (s, numpfx);
+  for (i = 0; i < numpfx; i++)
+    {
+      stream_put_ipv4 (s, pfxlist[i].prefix.s_addr);
+      stream_putc (s, pfxlist[i].prefixlen);
+    }
+  stream_putw_at (s, 0, stream_get_endp (s));
+  zebra_server_send_message (client);
+}
+
+/* Allocated stream size without the common message header and fixed fields,
+ * divided by number of bytes per data item.
+ */
+#define DESYNC_PFXS_PER_MSG ((ZEBRA_MAX_PACKET_SIZ - ZEBRA_HEADER_SIZE - 1 - 2) / 5)
+
+/* Verify the given set of EBGP nexthops (each consisting of original gate and
+ * resolved IGP gate) against the contents of the RIB. That is, find all
+ * EBGP-routed prefixes such that the original gate of the prefix's nexthop is
+ * present on the given set, but the resolved gates are different.
+ */
+static void
+verify_bgp_ipv4_rgates (struct zserv *client, struct route_table *nhlist)
+{
+  struct route_table *table;
+  struct route_node *rn;
+  struct rib *rib;
+  struct nexthop *ribnh;
+  struct prefix_ipv4 buffered[DESYNC_PFXS_PER_MSG];
+  unsigned numbuffered = 0;
+
+  if ((table = vrf_table (AFI_IP, SAFI_UNICAST, 0)))
+    for (rn = route_top (table); rn; rn = route_next (rn))
+      for (rib = rn->info; rib; rib = rib->next)
+        if
+        (
+          rib->type == ZEBRA_ROUTE_BGP &&
+          CHECK_FLAG (rib->flags, ZEBRA_FLAG_SELECTED) &&
+          ! CHECK_FLAG (rib->status, RIB_ENTRY_REMOVED) &&
+          CHECK_FLAG (rib->flags, ZEBRA_FLAG_INTERNAL)
+        )
+          for (ribnh = rib->nexthop; ribnh; ribnh = ribnh->next)
+            if
+            (
+              ribnh->type == NEXTHOP_TYPE_IPV4 &&
+              CHECK_FLAG (ribnh->flags, NEXTHOP_FLAG_FIB) &&
+              CHECK_FLAG (ribnh->flags, NEXTHOP_FLAG_RECURSIVE)
+            )
+              {
+                struct route_node *nhnode = route_node_match_ipv4 (nhlist, &ribnh->gate.ipv4);
+                struct in_addr *rgate;
+
+                if (nhnode == NULL)
+                  continue;
+                /* gate matches */
+                route_unlock_node (nhnode);
+                rgate = nhnode->info;
+                if (! IPV4_ADDR_SAME (&ribnh->rgate.ipv4, rgate))
+                  {
+                    /* but rgate does not */
+                    IPV4_ADDR_COPY (&buffered[numbuffered].prefix, &rn->p.u.prefix4);
+                    buffered[numbuffered].prefixlen = rn->p.prefixlen;
+                    if (++numbuffered == DESYNC_PFXS_PER_MSG)
+                      {
+                        zsend_ipv4_desync_prefixes (client, buffered, numbuffered, 1);
+                        numbuffered = 0;
+                      }
+                  }
+                break; /* only the first IGP nexthop of a BGP nexthop matters */
+              }
+  zsend_ipv4_desync_prefixes (client, buffered, numbuffered, 0);
+}
+
+/* Receive a list of nexthops to verify from zclient (bgpd) using one or more
+ * ZEBRA_BGP_IPV4_RGATE_VERIFY messages.
+ *
+ * Note that Length and Command are already consumed by zebra_client_read().
+ *
+ *  0                   1                   2                   3
+ *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * |  More Follow  |      Number of Nexthops       |
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * |                        Nexthop1 "gate"                        |
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * |                        Nexthop1 "rgate"                       |
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * :                                                               :
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * |                        NexthopN "gate"                        |
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ * |                        NexthopN "rgate"                       |
+ * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *
+ * Note that number of BGP nexthops to be processed may be larger, than the
+ * maximum size of a zebra protocol packet allows (see the definition of
+ * VERIFIED_NEXTHOPS_PER_MSG macro). At the same time, the nexthop verification
+ * procedure is best performed on all nexthops at once, rather than on each
+ * subset at a time. This concern is addressed through the More Follow flag,
+ * which has the same semantics as for the sending case of
+ * ZEBRA_BGP_IPV4_RGATE_VERIFY: the subsets are accumulated on the zserv side
+ * and processed all at once as soon as the last subset has arrived.
+ */
+static void
+zread_bgp_ipv4_rgate_verify (struct zserv *client, const u_short length)
+{
+  struct stream *s = client->ibuf;
+  struct prefix gate;
+  struct route_node *rn;
+  unsigned numnh;
+  u_char morefollow;
+
+  gate.family = AF_INET;
+  gate.prefixlen = IPV4_MAX_PREFIXLEN;
+  if (vnhlist == NULL)
+    vnhlist = route_table_init();
+
+  /* read request */
+  assert (length >= 3);
+  morefollow = stream_getc (s);
+  numnh = stream_getw (s);
+  if (IS_ZEBRA_DEBUG_PACKET && IS_ZEBRA_DEBUG_RECV)
+    zlog_debug ("%s: reading %u nexthops", __func__, numnh);
+  assert (length == 3 + 8 * numnh);
+  while (numnh--)
+    {
+      struct in_addr rgate;
+
+      gate.u.prefix4.s_addr = stream_get_ipv4 (s);
+      rgate.s_addr = stream_get_ipv4 (s);
+      if (IS_ZEBRA_DEBUG_PACKET && IS_ZEBRA_DEBUG_RECV)
+        {
+          char gatebuf[INET_ADDRSTRLEN], rgatebuf[INET_ADDRSTRLEN];
+          inet_ntop (AF_INET, &gate.u.prefix4, gatebuf, INET_ADDRSTRLEN);
+          inet_ntop (AF_INET, &rgate, rgatebuf, INET_ADDRSTRLEN);
+          zlog_debug ("%s: gate %s rgate %s", __func__, gatebuf, rgatebuf);
+        }
+      rn = route_node_get (vnhlist, &gate);
+      if (rn->lock > 1)
+        {
+          zlog_warn ("%s: duplicate nexthop", __func__);
+          while (rn->lock > 1)
+            route_unlock_node (rn);
+        }
+      rn->info = XCALLOC (MTYPE_TMP, sizeof (struct in_addr));
+      IPV4_ADDR_COPY ((struct in_addr *)rn->info, &rgate);
+    }
+  if (morefollow)
+    return;
+  /* All arrived, proceed to real processing. */
+  verify_bgp_ipv4_rgates (client, vnhlist);
+  for (rn = route_top (vnhlist); rn; rn = route_next (rn))
+    if (rn->info != NULL)
+      XFREE (MTYPE_TMP, rn->info);
+  route_table_finish (vnhlist);
+  vnhlist = NULL;
+}
+
 /* Nexthop lookup for IPv4. */
 static int
 zread_ipv4_import_lookup (struct zserv *client, u_short length)
@@ -1357,6 +1554,9 @@ zebra_client_read (struct thread *thread)
       break;
     case ZEBRA_HELLO:
       zread_hello (client);
+      break;
+    case ZEBRA_BGP_IPV4_RGATE_VERIFY:
+      zread_bgp_ipv4_rgate_verify (client, length);
       break;
     default:
       zlog_info ("Zebra received unknown command %d", command);

@@ -28,6 +28,7 @@ Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 #include "network.h"
 #include "log.h"
 #include "memory.h"
+#include "table.h"
 
 #include "bgpd/bgpd.h"
 #include "bgpd/bgp_table.h"
@@ -43,6 +44,7 @@ struct bgp_nexthop_cache *zlookup_query (struct in_addr);
 #ifdef HAVE_IPV6
 struct bgp_nexthop_cache *zlookup_query_ipv6 (struct in6_addr *);
 #endif /* HAVE_IPV6 */
+static int zlookup_write_packet (const char *, int *, const u_char *, const int);
 
 /* Only one BGP scan thread are activated at the same time. */
 static struct thread *bgp_scan_thread = NULL;
@@ -401,6 +403,125 @@ bgp_nexthop_cache_reset (struct bgp_table *table)
       }
 }
 
+/* Translate the contents of a series of received ZEBRA_BGP_IPV4_RGATE_VERIFY
+ * messages into the provided route_table structure.
+ */
+static u_char
+recv_verified_desync_prefixes (struct route_table *pfxlist)
+{
+  struct stream *s = zlookup->ibuf;
+  uint16_t length;
+  u_char marker;
+  u_char version;
+  u_char morefollows;
+  unsigned numpfx;
+
+  stream_reset (s);
+
+  stream_read (s, zlookup->sock, 2); /* nbytes */
+  length = stream_getw (s);
+
+  stream_read (s, zlookup->sock, length - 2); /* nbytes */
+  marker = stream_getc (s);
+  version = stream_getc (s);
+
+  if (version != ZSERV_VERSION || marker != ZEBRA_HEADER_MARKER)
+    {
+      zlog_err ("%s: socket %d version mismatch, marker %d, version %d",
+               __func__, zlookup->sock, marker, version);
+      return 0;
+    }
+  assert (stream_getw (s) == ZEBRA_BGP_IPV4_RGATE_VERIFY);
+
+  morefollows = stream_getc (s);
+  numpfx = stream_getw (s);
+  if (BGP_DEBUG (nexthop, NEXTHOP))
+    zlog_debug ("%s: receiving %s%u IPv4 prefixes", __func__, morefollows ? "" : "last ", numpfx);
+  while (numpfx--)
+    {
+      struct prefix p;
+      struct route_node *rn;
+
+      p.family = AF_INET;
+      p.u.prefix4.s_addr = stream_get_ipv4 (s);
+      p.prefixlen = stream_getc (s);
+      rn = route_node_get (pfxlist, &p);
+      if (rn->lock > 1)
+        {
+          zlog_warn ("%s: duplicate prefix", __func__);
+          while (rn->lock > 1)
+            route_unlock_node (rn);
+        }
+      rn->info = pfxlist; /* not used to access data, but must be non-NULL */
+    }
+  return morefollows;
+}
+
+/* Translate the provided array of nexthops into a series of transmitted
+ * ZEBRA_BGP_IPV4_RGATE_VERIFY messages.
+ */
+static int
+send_rgates (const struct nexthop nhbuf[], const unsigned numnh, const u_char morefollow)
+{
+  unsigned i;
+  struct stream *s = zlookup->obuf;
+
+  stream_reset (s);
+  zclient_create_header (s, ZEBRA_BGP_IPV4_RGATE_VERIFY);
+  stream_putc (s, morefollow);
+  stream_putw (s, numnh);
+  for (i = 0; i < numnh; i++)
+    {
+      stream_put_ipv4 (s, nhbuf[i].gate.ipv4.s_addr);
+      stream_put_ipv4 (s, nhbuf[i].rgate.ipv4.s_addr);
+    }
+  if (BGP_DEBUG (nexthop, NEXTHOP))
+    zlog_debug ("%s: sent %u IPv4 nexthops to verify", __func__, numnh);
+  stream_putw_at (s, 0, stream_get_endp (s));
+  return zlookup_write_packet (__func__, &zlookup->sock, stream_get_data (s), stream_get_endp (s));
+}
+
+/* Allocated stream size without the common message header and fixed fields,
+ * divided by number of bytes per data item.
+ */
+#define VERIFIED_NEXTHOPS_PER_MSG ((ZEBRA_MAX_PACKET_SIZ - ZEBRA_HEADER_SIZE - 1 - 2) / 8)
+
+/* Feed the given BNCT copy to zserv and store the nexthop verification results
+ * (prefixes) received from zebra into the provided route_table.
+ */
+static void
+verify_ipv4_rgates (struct bgp_table *nhtable, struct route_table *pfxlist)
+{
+  struct bgp_node *rn;
+  struct bgp_nexthop_cache *bnc;
+  struct nexthop buffered[VERIFIED_NEXTHOPS_PER_MSG];
+  unsigned numbuffered = 0;
+  unsigned i;
+
+  if (zlookup->sock < 0)
+    return;
+
+  for (rn = bgp_table_top (nhtable); rn; rn = bgp_route_next (rn))
+    if ((bnc = rn->info) != NULL && bnc->valid)
+      for (i = 0; i < bnc->nexthop_num; i++)
+        if (bnc->nexthop[i].type == NEXTHOP_TYPE_IPV4)
+          {
+            IPV4_ADDR_COPY (&buffered[numbuffered].gate.ipv4, &rn->p.u.prefix4);
+            IPV4_ADDR_COPY (&buffered[numbuffered].rgate.ipv4, &bnc->nexthop[i].gate.ipv4);
+            if (++numbuffered == VERIFIED_NEXTHOPS_PER_MSG)
+              {
+                if (send_rgates (buffered, numbuffered, 1) <= 0)
+                  return;
+                numbuffered = 0;
+              }
+            break; /* only the first IGP nexthop of a BGP nexthop matters */
+          }
+
+  if (send_rgates (buffered, numbuffered, 0) <= 0)
+    return;
+  while (recv_verified_desync_prefixes (pfxlist));
+}
+
 static void
 bgp_scan (afi_t afi, safi_t safi)
 {
@@ -410,6 +531,8 @@ bgp_scan (afi_t afi, safi_t safi)
   struct bgp_info *next;
   struct peer *peer;
   struct listnode *node, *nnode;
+  struct route_table *desyncpfxs;
+  struct route_node *dprn;
   int valid;
   int current;
   int changed;
@@ -439,6 +562,12 @@ bgp_scan (afi_t afi, safi_t safi)
 	bgp_maximum_prefix_overflow (peer, afi, SAFI_MPLS_VPN, 1);
     }
 
+  if (afi == AFI_IP)
+    {
+      desyncpfxs = route_table_init();
+      verify_ipv4_rgates (bnct_inactive (afi), desyncpfxs);
+    }
+
   for (rn = bgp_table_top (bgp->rib[afi][SAFI_UNICAST]); rn;
        rn = bgp_route_next (rn))
     {
@@ -450,6 +579,27 @@ bgp_scan (afi_t afi, safi_t safi)
 	    {
 	      changed = 0;
 	      metricchanged = 0;
+
+              if (afi == AFI_IP)
+                if ((dprn = route_node_match (desyncpfxs, &rn->p)))
+                  {
+                    /* The current prefix failed zebra nexthop verification,
+                     * further checks can be omitted.
+                     */
+                    route_unlock_node (dprn);
+                    if (BGP_DEBUG (nexthop, NEXTHOP))
+                      {
+                        char buf[INET_ADDRSTRLEN];
+                        inet_ntop (AF_INET, &rn->p.u.prefix4, buf, INET_ADDRSTRLEN);
+                        zlog_debug ("%s: rgate out of sync for %s/%u", __func__, buf, rn->p.prefixlen);
+                      }
+                    /* Setting this flag will eventually lead to the old BGP RIB
+                     * entry of the prefix withdrawn at zebra side of the socket
+                     * and reinstalled using freshly resolved IGP gateway.
+                     */
+                    SET_FLAG (bi->flags, BGP_INFO_IGP_CHANGED);
+                    goto nextprefix;
+                  }
 
 	      if (peer_sort (bi->peer) == BGP_PEER_EBGP && bi->peer->ttl == 1)
 		valid = bgp_nexthop_onlink (afi, bi->attr);
@@ -486,12 +636,19 @@ bgp_scan (afi_t afi, safi_t safi)
                 if (bgp_damp_scan (bi, afi, SAFI_UNICAST))
 		  bgp_aggregate_increment (bgp, &rn->p, bi,
 					   afi, SAFI_UNICAST);
+nextprefix: ;
 	    }
 	}
       bgp_process (bgp, rn, afi, SAFI_UNICAST);
     }
 
   bgp_nexthop_cache_reset (bnct_inactive (afi));
+  if (afi == AFI_IP)
+    {
+      for (dprn = route_top (desyncpfxs); dprn; dprn = route_next (dprn))
+        dprn->info = NULL;
+      route_table_finish (desyncpfxs);
+    }
 }
 
 /* BGP scan thread.  This thread check nexthop reachability. */
