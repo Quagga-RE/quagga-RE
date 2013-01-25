@@ -17,7 +17,7 @@ except that this permission notice may be stated in a translation
 approved by Kunihiro Ishiguro.
 
  -->
-<!-- Created on September 23, 2012 by texi2html 1.82
+<!-- Created on January 25, 2013 by texi2html 1.82
 texi2html was written by: 
             Lionel Cons <Lionel.Cons@cern.ch> (original author)
             Karl Berry  <karl@freefriends.org>
@@ -70,7 +70,7 @@ ul.toc {list-style: none}
 		     
 <p><a href="http://www.quagga.net">Quagga</a> is an advanced routing software package
 that provides a suite of TCP/IP based routing protocols.  This is the Manual
-for Quagga 0.99.17.11. <a href="http://www.quagga.net">Quagga</a> is a fork of 
+for Quagga 0.99.17.12. <a href="http://www.quagga.net">Quagga</a> is a fork of 
 <a href="http://www.zebra.org">GNU Zebra</a>.
 </p>
 <p>Copyright &copy; 1999-2005 Kunihiro Ishiguro, et al.
@@ -1616,7 +1616,7 @@ Trying 127.0.0.1...
 Connected to localhost.
 Escape character is '^]'.
 
-Hello, this is Quagga (version 0.99.17.11)
+Hello, this is Quagga (version 0.99.17.12)
 Copyright &copy; 1999-2005 Kunihiro Ishiguro, et al.
 
 User Access Verification
@@ -3075,7 +3075,7 @@ RIP, valid metric values are from 1 to 16.
 
 <p>RIPv2 allows packets to be authenticated via either an insecure plain
 text password, included with the packet, or via a more secure MD5 based
-<acronym title="keyed-Hashing for Message AuthentiCation">HMAC</acronym> (keyed-Hashing for Message AuthentiCation),
+<acronym title="Hash-based Message Authentication Code">HMAC</acronym> (Hash-based Message Authentication Code),
 RIPv1 can not be authenticated at all, thus when authentication is
 configured <code>ripd</code> will discard routing updates received via RIPv1
 packets.
@@ -6853,32 +6853,37 @@ Total number of prefixes 1
 </p></dd></dl>
 
 <dl>
-<dt><a name="index-show-debug"></a><u>Command:</u> <b>show debug</b></dt>
-</dl>
+<dt><a name="index-show-debugging-bgp"></a><u>Command:</u> <b>show debugging bgp</b></dt>
+<dd><p>Display which of the BGP debug modes (see below) are turned on.
+</p></dd></dl>
 
 <dl>
-<dt><a name="index-debug-event"></a><u>Command:</u> <b>debug event</b></dt>
-</dl>
-
-<dl>
-<dt><a name="index-debug-update"></a><u>Command:</u> <b>debug update</b></dt>
-</dl>
-
-<dl>
-<dt><a name="index-debug-keepalive"></a><u>Command:</u> <b>debug keepalive</b></dt>
-</dl>
-
-<dl>
-<dt><a name="index-no-debug-event"></a><u>Command:</u> <b>no debug event</b></dt>
-</dl>
-
-<dl>
-<dt><a name="index-no-debug-update"></a><u>Command:</u> <b>no debug update</b></dt>
-</dl>
-
-<dl>
-<dt><a name="index-no-debug-keepalive"></a><u>Command:</u> <b>no debug keepalive</b></dt>
-</dl>
+<dt><a name="index-debug-bgp-_005bkind_005d"></a><u>Command:</u> <b>debug bgp [<var>kind</var>]</b></dt>
+<dt><a name="index-no-debug-bgp-_005bkind_005d"></a><u>Command:</u> <b>no debug bgp [<var>kind</var>]</b></dt>
+<dt><a name="index-undebug-bgp-_005bkind_005d"></a><u>Command:</u> <b>undebug bgp [<var>kind</var>]</b></dt>
+<dd><p>Manage BGP debugging modes, either general (when the argument is missing) or
+specific to particular protocol subsystems:
+</p><ul>
+<li>
+<code>as4 [segment]</code>
+</li><li>
+<code>events</code>
+</li><li>
+<code>filters</code>
+</li><li>
+<code>fsm</code>
+</li><li>
+<code>filters</code>
+</li><li>
+<code>keepalives</code>
+</li><li>
+<code>updates [in|out]</code>
+</li><li>
+<code>zebra</code>
+</li><li>
+<code>nexthop</code>
+</li></ul>
+</dd></dl>
 
 <hr size="6">
 <a name="Capability-Negotiation"></a>
@@ -10591,8 +10596,7 @@ and Address Family == IP version 6
 <tr><td colspan="3"> <hr></td></tr>
 <tr><th><a name="Command-Index-1_fn_letter-D">D</a></th><td></td><td></td></tr>
 <tr><td></td><td valign="top"><a href="#index-debug-babel-kind"><code>debug babel <var>kind</var></code></a></td><td valign="top"><a href="#Babel-debugging-commands">9.6 Babel debugging commands</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-debug-event"><code>debug event</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-debug-keepalive"><code>debug keepalive</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-debug-bgp-_005bkind_005d"><code>debug bgp [<var>kind</var>]</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-debug-ospf-ism"><code>debug ospf ism</code></a></td><td valign="top"><a href="#Debugging-OSPF">7.7 Debugging OSPF</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-debug-ospf-ism-_0028status_007cevents_007ctimers_0029"><code>debug ospf ism (status|events|timers)</code></a></td><td valign="top"><a href="#Debugging-OSPF">7.7 Debugging OSPF</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-debug-ospf-lsa"><code>debug ospf lsa</code></a></td><td valign="top"><a href="#Debugging-OSPF">7.7 Debugging OSPF</a></td></tr>
@@ -10609,7 +10613,6 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-debug-ripng-events"><code>debug ripng events</code></a></td><td valign="top"><a href="#ripngd-Terminal-Mode-Commands">6.3 ripngd Terminal Mode Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-debug-ripng-packet"><code>debug ripng packet</code></a></td><td valign="top"><a href="#ripngd-Terminal-Mode-Commands">6.3 ripngd Terminal Mode Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-debug-ripng-zebra"><code>debug ripng zebra</code></a></td><td valign="top"><a href="#ripngd-Terminal-Mode-Commands">6.3 ripngd Terminal Mode Commands</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-debug-update"><code>debug update</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-default_002dinformation-originate"><code>default-information originate</code></a></td><td valign="top"><a href="#How-to-Announce-RIP-route">5.4 How to Announce RIP route</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-default_002dinformation-originate-1"><code>default-information originate</code></a></td><td valign="top"><a href="#Redistribute-routes-to-OSPF">7.5 Redistribute routes to OSPF</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-default_002dinformation-originate-always"><code>default-information originate always</code></a></td><td valign="top"><a href="#Redistribute-routes-to-OSPF">7.5 Redistribute routes to OSPF</a></td></tr>
@@ -10839,8 +10842,7 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-no-banner-motd"><code>no banner motd</code></a></td><td valign="top"><a href="#Basic-Config-Commands">3.1.1 Basic Config Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-bgp-multiple_002dinstance"><code>no bgp multiple-instance</code></a></td><td valign="top"><a href="#Multiple-instance">10.13.1 Multiple instance</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-debug-babel-kind"><code>no debug babel <var>kind</var></code></a></td><td valign="top"><a href="#Babel-debugging-commands">9.6 Babel debugging commands</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-debug-event"><code>no debug event</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-debug-keepalive"><code>no debug keepalive</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-no-debug-bgp-_005bkind_005d"><code>no debug bgp [<var>kind</var>]</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-debug-ospf-ism"><code>no debug ospf ism</code></a></td><td valign="top"><a href="#Debugging-OSPF">7.7 Debugging OSPF</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-debug-ospf-ism-_0028status_007cevents_007ctimers_0029"><code>no debug ospf ism (status|events|timers)</code></a></td><td valign="top"><a href="#Debugging-OSPF">7.7 Debugging OSPF</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-debug-ospf-lsa"><code>no debug ospf lsa</code></a></td><td valign="top"><a href="#Debugging-OSPF">7.7 Debugging OSPF</a></td></tr>
@@ -10850,7 +10852,6 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-no-debug-ospf-packet-_0028hello_007cdd_007cls_002drequest_007cls_002dupdate_007cls_002dack_007call_0029-_0028send_007crecv_0029-_005bdetail_005d"><code>no debug ospf packet (hello|dd|ls-request|ls-update|ls-ack|all) (send|recv) [detail]</code></a></td><td valign="top"><a href="#Debugging-OSPF">7.7 Debugging OSPF</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-debug-ospf-zebra"><code>no debug ospf zebra</code></a></td><td valign="top"><a href="#Debugging-OSPF">7.7 Debugging OSPF</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-debug-ospf-zebra-_0028interface_007credistribute_0029"><code>no debug ospf zebra (interface|redistribute)</code></a></td><td valign="top"><a href="#Debugging-OSPF">7.7 Debugging OSPF</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-no-debug-update"><code>no debug update</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-default_002dinformation-originate"><code>no default-information originate</code></a></td><td valign="top"><a href="#Redistribute-routes-to-OSPF">7.5 Redistribute routes to OSPF</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-default_002dmetric"><code>no default-metric</code></a></td><td valign="top"><a href="#Redistribute-routes-to-OSPF">7.5 Redistribute routes to OSPF</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-no-default_002dmetric-_003c1_002d16_003e"><code>no default-metric &lt;1-16&gt;</code></a></td><td valign="top"><a href="#RIP-Metric-Manipulation">5.6 RIP Metric Manipulation</a></td></tr>
@@ -11075,7 +11076,7 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-show-babel-route-X_003aX_003a_003aX_003aX"><code>show babel route X:X::X:X</code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-babel-route-X_003aX_003a_003aX_003aX_002fM"><code>show babel route X:X::X:X/M</code></a></td><td valign="top"><a href="#Show-Babel-information">9.5 Show Babel information</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-crypto"><code>show crypto</code></a></td><td valign="top"><a href="#Terminal-Mode-Commands">3.2 Terminal Mode Commands</a></td></tr>
-<tr><td></td><td valign="top"><a href="#index-show-debug"><code>show debug</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
+<tr><td></td><td valign="top"><a href="#index-show-debugging-bgp"><code>show debugging bgp</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-debugging-ospf"><code>show debugging ospf</code></a></td><td valign="top"><a href="#Debugging-OSPF">7.7 Debugging OSPF</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-debugging-rip"><code>show debugging rip</code></a></td><td valign="top"><a href="#RIP-Debug-Commands">5.12 RIP Debug Commands</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-show-debugging-ripng"><code>show debugging ripng</code></a></td><td valign="top"><a href="#ripngd-Terminal-Mode-Commands">6.3 ripngd Terminal Mode Commands</a></td></tr>
@@ -11159,6 +11160,7 @@ and Address Family == IP version 6
 <tr><td></td><td valign="top"><a href="#index-ts_002dbase-_0028zero_007cunixtime_0029"><code>ts-base (zero|unixtime)</code></a></td><td valign="top"><a href="#Babel-configuration">9.3 Babel configuration</a></td></tr>
 <tr><td colspan="3"> <hr></td></tr>
 <tr><th><a name="Command-Index-1_fn_letter-U">U</a></th><td></td><td></td></tr>
+<tr><td></td><td valign="top"><a href="#index-undebug-bgp-_005bkind_005d"><code>undebug bgp [<var>kind</var>]</code></a></td><td valign="top"><a href="#More-Show-IP-BGP">10.10.2 More Show IP BGP</a></td></tr>
 <tr><td></td><td valign="top"><a href="#index-username-username-nopassword"><code>username <var>username</var> nopassword</code></a></td><td valign="top"><a href="#VTY-shell-username">12.1 VTY shell username</a></td></tr>
 <tr><td colspan="3"> <hr></td></tr>
 <tr><th><a name="Command-Index-1_fn_letter-V">V</a></th><td></td><td></td></tr>
@@ -11744,7 +11746,7 @@ and Address Family == IP version 6
 </tr></table>
 <h1>About This Document</h1>
 <p>
-  This document was generated by <em>Denis Ovsienko</em> on <em>September 23, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
+  This document was generated by <em>Denis Ovsienko</em> on <em>January 25, 2013</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
 </p>
 <p>
   The buttons in the navigation panels have the following meaning:
@@ -11846,7 +11848,7 @@ and Address Family == IP version 6
 <hr size="1">
 <p>
  <font size="-1">
-  This document was generated by <em>Denis Ovsienko</em> on <em>September 23, 2012</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
+  This document was generated by <em>Denis Ovsienko</em> on <em>January 25, 2013</em> using <a href="http://www.nongnu.org/texi2html/"><em>texi2html 1.82</em></a>.
  </font>
  <br>
 
