@@ -507,6 +507,7 @@ struct in_pktinfo
 #define ZEBRA_ISIS_DISTANCE_DEFAULT      115
 #define ZEBRA_IBGP_DISTANCE_DEFAULT      200
 #define ZEBRA_EBGP_DISTANCE_DEFAULT       20
+#define ZEBRA_BABEL_DISTANCE_DEFAULT      95
 
 /* Flag manipulation macros. */
 #define CHECK_FLAG(V,F)      ((V) & (F))

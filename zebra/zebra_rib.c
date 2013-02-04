@@ -73,17 +73,18 @@ static const struct
   int distance;
 } route_info[ZEBRA_ROUTE_MAX] =
 {
-  [ZEBRA_ROUTE_SYSTEM]  = {ZEBRA_ROUTE_SYSTEM,    0},
-  [ZEBRA_ROUTE_KERNEL]  = {ZEBRA_ROUTE_KERNEL,    0},
-  [ZEBRA_ROUTE_CONNECT] = {ZEBRA_ROUTE_CONNECT,   0},
-  [ZEBRA_ROUTE_STATIC]  = {ZEBRA_ROUTE_STATIC,    1},
-  [ZEBRA_ROUTE_RIP]     = {ZEBRA_ROUTE_RIP,     120},
-  [ZEBRA_ROUTE_RIPNG]   = {ZEBRA_ROUTE_RIPNG,   120},
-  [ZEBRA_ROUTE_OSPF]    = {ZEBRA_ROUTE_OSPF,    110},
-  [ZEBRA_ROUTE_OSPF6]   = {ZEBRA_ROUTE_OSPF6,   110},
-  [ZEBRA_ROUTE_ISIS]    = {ZEBRA_ROUTE_ISIS,    115},
-  [ZEBRA_ROUTE_BGP]     = {ZEBRA_ROUTE_BGP,      20  /* IBGP is 200. */},
-  [ZEBRA_ROUTE_BABEL]   = {ZEBRA_ROUTE_BABEL,    95},
+  [ZEBRA_ROUTE_SYSTEM ] = { ZEBRA_ROUTE_SYSTEM,  0                              },
+  [ZEBRA_ROUTE_KERNEL ] = { ZEBRA_ROUTE_KERNEL,  ZEBRA_KERNEL_DISTANCE_DEFAULT  },
+  [ZEBRA_ROUTE_CONNECT] = { ZEBRA_ROUTE_CONNECT, ZEBRA_CONNECT_DISTANCE_DEFAULT },
+  [ZEBRA_ROUTE_STATIC ] = { ZEBRA_ROUTE_STATIC,  ZEBRA_STATIC_DISTANCE_DEFAULT  },
+  [ZEBRA_ROUTE_RIP    ] = { ZEBRA_ROUTE_RIP,     ZEBRA_RIP_DISTANCE_DEFAULT     },
+  [ZEBRA_ROUTE_RIPNG  ] = { ZEBRA_ROUTE_RIPNG,   ZEBRA_RIPNG_DISTANCE_DEFAULT   },
+  [ZEBRA_ROUTE_OSPF   ] = { ZEBRA_ROUTE_OSPF,    ZEBRA_OSPF_DISTANCE_DEFAULT    },
+  [ZEBRA_ROUTE_OSPF6  ] = { ZEBRA_ROUTE_OSPF6,   ZEBRA_OSPF6_DISTANCE_DEFAULT   },
+  [ZEBRA_ROUTE_ISIS   ] = { ZEBRA_ROUTE_ISIS,    ZEBRA_ISIS_DISTANCE_DEFAULT    },
+  [ZEBRA_ROUTE_BGP    ] = { ZEBRA_ROUTE_BGP,     ZEBRA_EBGP_DISTANCE_DEFAULT    },
+  /* mind the distance override for IBGP */
+  [ZEBRA_ROUTE_BABEL  ] = { ZEBRA_ROUTE_BABEL,   ZEBRA_BABEL_DISTANCE_DEFAULT   },
   /* no entry/default: 150 */
 };
 
@@ -1557,7 +1558,7 @@ rib_add_ipv4 (int type, int flags, struct prefix_ipv4 *p,
 
       /* iBGP distance is 200. */
       if (type == ZEBRA_ROUTE_BGP && CHECK_FLAG (flags, ZEBRA_FLAG_IBGP))
-	distance = 200;
+	distance = ZEBRA_IBGP_DISTANCE_DEFAULT;
     }
 
   /* Lookup route node.*/
@@ -1812,7 +1813,7 @@ rib_add_ipv4_multipath (struct prefix_ipv4 *p, struct rib *rib, safi_t safi)
       /* iBGP distance is 200. */
       if (rib->type == ZEBRA_ROUTE_BGP 
 	  && CHECK_FLAG (rib->flags, ZEBRA_FLAG_IBGP))
-	rib->distance = 200;
+	rib->distance = ZEBRA_IBGP_DISTANCE_DEFAULT;
     }
 
   /* Lookup route node.*/
@@ -2348,7 +2349,7 @@ rib_add_ipv6 (int type, int flags, struct prefix_ipv6 *p,
     distance = route_info[type].distance;
   
   if (type == ZEBRA_ROUTE_BGP && CHECK_FLAG (flags, ZEBRA_FLAG_IBGP))
-    distance = 200;
+    distance = ZEBRA_IBGP_DISTANCE_DEFAULT;
 
   /* Filter bogus route. */
   if (rib_bogus_ipv6 (type, p, gate, ifindex, 0))
