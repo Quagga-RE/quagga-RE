@@ -234,13 +234,15 @@ babel_esalist_derive
   struct list * (*keychain_filter_func) (const struct keychain *, const time_t)
 )
 {
-  struct list *all_esas, *filtered_keys;
+  struct list *filtered_keys, *all_esas, *unique_esas;
   struct listnode *node1, *node2;
   struct babel_csa_item *csa;
   struct keychain *keychain;
   struct key *key;
   unsigned csa_counter = 0;
+  struct babel_esa_item *esa;
 
+  /* Transform the list of CSAs into a list of ESAs with specific ordering. */
   all_esas = list_new();
   all_esas->del = babel_esa_item_free;
   all_esas->cmp = (int (*) (void *, void *)) babel_esa_item_cmp;
@@ -254,19 +256,12 @@ babel_esalist_derive
               csa->keychain_name, LOOKUP (hash_algo_str, csa->hash_algo));
       continue;
     }
-    debugf (BABEL_DEBUG_AUTH, "%s: found keychain '%s' with %u key(s) for %s", __func__,
-            csa->keychain_name, listcount (keychain->key), LOOKUP (hash_algo_str, csa->hash_algo));
     filtered_keys = keychain_filter_func (keychain, now);
+    debugf (BABEL_DEBUG_AUTH, "%s: using keychain '%s' with %u (%u valid) key(s) for %s", __func__,
+            csa->keychain_name, listcount (keychain->key), listcount (filtered_keys),
+            LOOKUP (hash_algo_str, csa->hash_algo));
     for (ALL_LIST_ELEMENTS_RO (filtered_keys, node2, key))
     {
-      struct babel_esa_item *esa;
-      if (babel_esa_item_exists (all_esas, csa->hash_algo, key->index % (UINT16_MAX + 1),
-          strlen (key->string), (u_int8_t *) key->string))
-      {
-        debugf (BABEL_DEBUG_AUTH, "%s: KeyID %u is a full duplicate of another key", __func__,
-                key->index % (UINT16_MAX + 1));
-        continue;
-      }
       esa = babel_esa_item_alloc (csa->hash_algo, key->index % (UINT16_MAX + 1),
                                   strlen (key->string), (u_int8_t *)key->string);
       /* The all_esas list will have first keys of all CSAs in the order of CSAs,
@@ -281,7 +276,22 @@ babel_esalist_derive
     list_delete (filtered_keys);
     csa_counter++;
   }
-  return all_esas;
+  debugf (BABEL_DEBUG_AUTH, "%s: %u non-unique ESAs", __func__, listcount (all_esas));
+
+  /* Remove duplicate ESAs. Processing below preserves sort order between the
+   * elements that make it onto the filtered list. */
+  unique_esas = list_new();
+  unique_esas->del = babel_esa_item_free;
+  for (ALL_LIST_ELEMENTS_RO (all_esas, node1, esa))
+    if (babel_esa_item_exists (unique_esas, esa->hash_algo, esa->key_id, esa->key_len, esa->key_secret))
+      debugf (BABEL_DEBUG_AUTH, "%s: suppressing a duplicate ESA with HashAlgo %s KeyID %u", __func__,
+              LOOKUP (hash_algo_str, esa->hash_algo), esa->key_id);
+    else
+      listnode_add (unique_esas, babel_esa_item_alloc (esa->hash_algo, esa->key_id, esa->key_len,
+                                                       esa->key_secret));
+  debugf (BABEL_DEBUG_AUTH, "%s: %u unique ESAs", __func__, listcount (unique_esas));
+  list_delete (all_esas);
+  return unique_esas;
 }
 
 /* Return "stream getp" coordinate of PC followed by TS, if the first TS/PC TLV
@@ -509,7 +519,6 @@ int babel_auth_check_packet
   /* build ESA list */
   now = quagga_time (NULL);
   esalist = babel_esalist_derive (babel_ifp->csalist, now, keys_valid_for_accept);
-  debugf (BABEL_DEBUG_AUTH, "%s: %u ESAs available", __func__, listcount (esalist));
   if (! listcount (esalist))
   {
     stats.auth_recv_ng_nokeys++;
@@ -636,7 +645,6 @@ int babel_auth_make_packet (struct interface *ifp, unsigned char * body, const u
   /* build ESA list */
   now = quagga_time (NULL);
   esalist = babel_esalist_derive (babel_ifp->csalist, now, keys_valid_for_send);
-  debugf (BABEL_DEBUG_AUTH, "%s: %u ESAs available", __func__, listcount (esalist));
   if (! listcount (esalist))
   {
     stats.auth_sent_ng_nokeys++;
