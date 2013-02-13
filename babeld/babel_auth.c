@@ -197,14 +197,7 @@ babel_esa_item_cmp (struct babel_esa_item *val1, struct babel_esa_item *val2)
 
 /* Return 1, if the list contains a ESA record with the same attributes. */
 static unsigned char
-babel_esa_item_exists
-(
-  const struct list *esalist,
-  const unsigned new_hash_algo,
-  const u_int16_t new_key_id,
-  const size_t new_key_len,
-  const u_int8_t * new_key_secret
-)
+babel_esa_item_exists (const struct list *esalist, const struct babel_esa_item *lookup)
 {
   struct listnode *node;
   struct babel_esa_item *esa;
@@ -212,10 +205,10 @@ babel_esa_item_exists
   for (ALL_LIST_ELEMENTS_RO (esalist, node, esa))
     if
     (
-      esa->hash_algo == new_hash_algo &&
-      esa->key_id == new_key_id &&
-      esa->key_len == new_key_len &&
-      ! memcmp (esa->key_secret, new_key_secret, new_key_len)
+      esa->hash_algo == lookup->hash_algo &&
+      esa->key_id == lookup->key_id &&
+      esa->key_len == lookup->key_len &&
+      ! memcmp (esa->key_secret, lookup->key_secret, lookup->key_len)
     )
       return 1;
   return 0;
@@ -283,7 +276,7 @@ babel_esalist_derive
   unique_esas = list_new();
   unique_esas->del = babel_esa_item_free;
   for (ALL_LIST_ELEMENTS_RO (all_esas, node1, esa))
-    if (babel_esa_item_exists (unique_esas, esa->hash_algo, esa->key_id, esa->key_len, esa->key_secret))
+    if (babel_esa_item_exists (unique_esas, esa))
       debugf (BABEL_DEBUG_AUTH, "%s: suppressing a duplicate ESA with HashAlgo %s KeyID %u", __func__,
               LOOKUP (hash_algo_str, esa->hash_algo), esa->key_id);
     else
