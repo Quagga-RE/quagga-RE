@@ -244,7 +244,7 @@ babel_esalist_new
       if (babel_esa_item_exists (esalist, csa->hash_algo, key->index % (UINT16_MAX + 1),
           strlen (key->string), (u_int8_t *) key->string))
       {
-        debugf (BABEL_DEBUG_AUTH, "%s: key ID %u is a full duplicate of another key", __func__,
+        debugf (BABEL_DEBUG_AUTH, "%s: KeyID %u is a full duplicate of another key", __func__,
                 key->index % (UINT16_MAX + 1));
         continue;
       }
@@ -258,7 +258,7 @@ babel_esalist_new
       esa->sort_order_major = key_counter;
       esa->sort_order_minor = csa_counter;
       listnode_add_sort (esalist, esa);
-      debugf (BABEL_DEBUG_AUTH, "%s: using key ID %d with sort order %u major %u minor", __func__,
+      debugf (BABEL_DEBUG_AUTH, "%s: using KeyID %u with sort order %u major %u minor", __func__,
               esa->key_id, key_counter, csa_counter);
       key_counter++;
     }
@@ -350,7 +350,7 @@ babel_auth_pad_packet (struct stream *packet, const unsigned char *addr6)
   return padded;
 }
 
-/* Scan the given packet for HMAC TLVs having Key ID and Length fields fitting
+/* Scan the given packet for HMAC TLVs having KeyID and Length fields fitting
  * the provided ESA. Return 1 if such TLVs exist and at least one has its Digest
  * field matching a locally-computed HMAC digest of the padded version of the
  * packet. Return 0 otherwise. */
@@ -422,7 +422,7 @@ babel_auth_try_hmac_tlvs
                     (*done == BABEL_MAXDIGESTSIN ? " (last)" : ""), printbuf);
       }
     }
-    debugf (BABEL_DEBUG_AUTH, "%s: HMAC TLV with key ID %u, digest size %u",
+    debugf (BABEL_DEBUG_AUTH, "%s: HMAC TLV with KeyID %u, digest size %u",
             __func__, tlv_key_id, tlv_length - 2);
     /* OK to compare Digest field */
     if (! memcmp (stream_get_data (packet) + stream_get_getp (packet), local_digest, tlv_length - 2))
@@ -651,7 +651,7 @@ int babel_auth_make_packet (struct interface *ifp, unsigned char * body, const u
             esa->key_id, stream_get_endp (packet));
     stream_putc (packet, MESSAGE_HMAC); /* type */
     stream_putc (packet, 2 + hash_digest_length[esa->hash_algo]); /* length */
-    stream_putw (packet, esa->key_id); /* key ID */
+    stream_putw (packet, esa->key_id); /* KeyID */
     digest_offset[hmacs_done] = stream_get_endp (packet);
     stream_put (packet, &sourceaddr.s6_addr, IPV6_MAX_BYTELEN);
     stream_put (packet, NULL, hash_digest_length[esa->hash_algo] - IPV6_MAX_BYTELEN);
