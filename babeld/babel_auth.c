@@ -153,6 +153,25 @@ babel_auth_do_housekeeping (struct thread *thread)
   return 0;
 }
 
+/* Deep copy function to allocate an ESA record. */
+static struct babel_esa_item *
+babel_esa_item_alloc
+(
+  const u_int16_t hash_algo,
+  const u_int16_t key_id,
+  const size_t key_len,
+  const u_int8_t * key_secret
+)
+{
+  struct babel_esa_item *copy = XCALLOC (MTYPE_BABEL_AUTH, sizeof (struct babel_esa_item));
+  copy->hash_algo = hash_algo;
+  copy->key_id = key_id;
+  copy->key_len = key_len;
+  copy->key_secret = XMALLOC (MTYPE_BABEL_AUTH, key_len);
+  memcpy (copy->key_secret, key_secret, key_len);
+  return copy;
+}
+
 /* List hook function to deallocate an ESA record. */
 static void
 babel_esa_item_free (void * esa_key)
@@ -248,11 +267,8 @@ babel_esalist_new
                 key->index % (UINT16_MAX + 1));
         continue;
       }
-      esa = XCALLOC (MTYPE_BABEL_AUTH, sizeof (struct babel_esa_item));
-      esa->key_secret = (u_int8_t *) XSTRDUP (MTYPE_BABEL_AUTH, key->string);
-      esa->hash_algo = csa->hash_algo;
-      esa->key_id = key->index % (UINT16_MAX + 1);
-      esa->key_len = strlen (key->string);
+      esa = babel_esa_item_alloc (csa->hash_algo, key->index % (UINT16_MAX + 1),
+                                  strlen (key->string), (u_int8_t *)key->string);
       /* The output list will have first keys of all CSAs in the order of CSAs,
        * then all second keys in the same order and so on. */
       esa->sort_order_major = key_counter;
