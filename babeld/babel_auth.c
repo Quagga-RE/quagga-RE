@@ -227,23 +227,23 @@ babel_esa_item_exists
  * Calling function is assumed to take care of deallocating the result with
  * list_delete(). */
 static struct list *
-babel_esalist_new
+babel_esalist_derive
 (
   const struct list * csalist,
   const time_t now,
   struct list * (*keychain_filter_func) (const struct keychain *, const time_t)
 )
 {
-  struct list *esalist, *eligible;
+  struct list *all_esas, *filtered_keys;
   struct listnode *node1, *node2;
   struct babel_csa_item *csa;
   struct keychain *keychain;
   struct key *key;
   unsigned csa_counter = 0;
 
-  esalist = list_new();
-  esalist->del = babel_esa_item_free;
-  esalist->cmp = (int (*) (void *, void *)) babel_esa_item_cmp;
+  all_esas = list_new();
+  all_esas->del = babel_esa_item_free;
+  all_esas->cmp = (int (*) (void *, void *)) babel_esa_item_cmp;
   for (ALL_LIST_ELEMENTS_RO (csalist, node1, csa))
   {
     unsigned key_counter = 0;
@@ -256,11 +256,11 @@ babel_esalist_new
     }
     debugf (BABEL_DEBUG_AUTH, "%s: found keychain '%s' with %u key(s) for %s", __func__,
             csa->keychain_name, listcount (keychain->key), LOOKUP (hash_algo_str, csa->hash_algo));
-    eligible = keychain_filter_func (keychain, now);
-    for (ALL_LIST_ELEMENTS_RO (eligible, node2, key))
+    filtered_keys = keychain_filter_func (keychain, now);
+    for (ALL_LIST_ELEMENTS_RO (filtered_keys, node2, key))
     {
       struct babel_esa_item *esa;
-      if (babel_esa_item_exists (esalist, csa->hash_algo, key->index % (UINT16_MAX + 1),
+      if (babel_esa_item_exists (all_esas, csa->hash_algo, key->index % (UINT16_MAX + 1),
           strlen (key->string), (u_int8_t *) key->string))
       {
         debugf (BABEL_DEBUG_AUTH, "%s: KeyID %u is a full duplicate of another key", __func__,
@@ -269,19 +269,19 @@ babel_esalist_new
       }
       esa = babel_esa_item_alloc (csa->hash_algo, key->index % (UINT16_MAX + 1),
                                   strlen (key->string), (u_int8_t *)key->string);
-      /* The output list will have first keys of all CSAs in the order of CSAs,
+      /* The all_esas list will have first keys of all CSAs in the order of CSAs,
        * then all second keys in the same order and so on. */
       esa->sort_order_major = key_counter;
       esa->sort_order_minor = csa_counter;
-      listnode_add_sort (esalist, esa);
+      listnode_add_sort (all_esas, esa);
       debugf (BABEL_DEBUG_AUTH, "%s: using KeyID %u with sort order %u major %u minor", __func__,
               esa->key_id, key_counter, csa_counter);
       key_counter++;
     }
-    list_delete (eligible);
+    list_delete (filtered_keys);
     csa_counter++;
   }
-  return esalist;
+  return all_esas;
 }
 
 /* Return "stream getp" coordinate of PC followed by TS, if the first TS/PC TLV
@@ -508,7 +508,7 @@ int babel_auth_check_packet
   padded = babel_auth_pad_packet (packet, from);
   /* build ESA list */
   now = quagga_time (NULL);
-  esalist = babel_esalist_new (babel_ifp->csalist, now, keys_valid_for_accept);
+  esalist = babel_esalist_derive (babel_ifp->csalist, now, keys_valid_for_accept);
   debugf (BABEL_DEBUG_AUTH, "%s: %u ESAs available", __func__, listcount (esalist));
   if (! listcount (esalist))
   {
@@ -635,7 +635,7 @@ int babel_auth_make_packet (struct interface *ifp, unsigned char * body, const u
   }
   /* build ESA list */
   now = quagga_time (NULL);
-  esalist = babel_esalist_new (babel_ifp->csalist, now, keys_valid_for_send);
+  esalist = babel_esalist_derive (babel_ifp->csalist, now, keys_valid_for_send);
   debugf (BABEL_DEBUG_AUTH, "%s: %u ESAs available", __func__, listcount (esalist));
   if (! listcount (esalist))
   {
