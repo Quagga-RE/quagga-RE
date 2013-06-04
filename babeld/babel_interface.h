@@ -45,7 +45,9 @@ struct babel_interface {
     unsigned char *ipv4;
     int buffered;
     int bufsize;
-    char have_buffered_hello;
+    /* Relative position of the Hello message in the send buffer, or
+       (-1) if there is none. */
+    int buffered_hello;
     char have_buffered_id;
     char have_buffered_nh;
     char have_buffered_prefix;

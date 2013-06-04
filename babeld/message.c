@@ -583,7 +583,7 @@ flushbuf(struct interface *ifp)
     }
     VALGRIND_MAKE_MEM_UNDEFINED(babel_ifp->sendbuf, babel_ifp->bufsize);
     babel_ifp->buffered = 0;
-    babel_ifp->have_buffered_hello = 0;
+    babel_ifp->buffered_hello = -1;
     babel_ifp->have_buffered_id = 0;
     babel_ifp->have_buffered_nh = 0;
     babel_ifp->have_buffered_prefix = 0;
@@ -766,7 +766,7 @@ send_hello_noupdate(struct interface *ifp, unsigned interval)
     babel_interface_nfo *babel_ifp = babel_get_if_nfo(ifp);
     /* This avoids sending multiple hellos in a single packet, which breaks
        link quality estimation. */
-    if(babel_ifp->have_buffered_hello)
+    if(babel_ifp->buffered_hello >= 0)
         flushbuf(ifp);
 
     babel_ifp->hello_seqno = seqno_plus(babel_ifp->hello_seqno, 1);
@@ -779,11 +779,11 @@ send_hello_noupdate(struct interface *ifp, unsigned interval)
            babel_ifp->hello_seqno, interval, ifp->name);
 
     start_message(ifp, MESSAGE_HELLO, 6);
+    babel_ifp->buffered_hello = babel_ifp->buffered - 2;
     accumulate_short(ifp, 0);
     accumulate_short(ifp, babel_ifp->hello_seqno);
     accumulate_short(ifp, interval > 0xFFFF ? 0xFFFF : interval);
     end_message(ifp, MESSAGE_HELLO, 6);
-    babel_ifp->have_buffered_hello = 1;
 }
 
 void
