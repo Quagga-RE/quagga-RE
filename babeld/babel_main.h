@@ -29,6 +29,7 @@ extern struct timeval babel_now;         /* current time             */
 extern struct thread_master *master;     /* quagga's threads handler */
 extern int debug;
 extern int resend_delay;
+extern unsigned int rtt_exponential_decay;
 
 extern unsigned char myid[8];
 

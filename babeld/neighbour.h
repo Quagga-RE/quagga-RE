@@ -39,6 +39,8 @@ struct neighbour {
        according to remote clock. */
     unsigned int hello_send_us;
     struct timeval hello_rtt_receive_time;
+    unsigned int rtt;
+    struct timeval rtt_time;
     struct interface *ifp;
 };
 
@@ -56,5 +58,6 @@ unsigned check_neighbours(void);
 unsigned neighbour_txcost(struct neighbour *neigh);
 unsigned neighbour_rxcost(struct neighbour *neigh);
 unsigned neighbour_cost(struct neighbour *neigh);
+int valid_rtt(struct neighbour *neigh);
 
 #endif /* BABEL_NEIGHBOUR_H */
