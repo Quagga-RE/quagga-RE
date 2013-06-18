@@ -64,10 +64,6 @@ struct timeval babel_now;         /* current time             */
 unsigned char myid[8];            /* unique id (mac address of an interface) */
 int debug = 0;
 
-/* A higher value means we forget old RTT samples faster. Must be
-   between 1 and 256, inclusive. */
-unsigned int rtt_exponential_decay = 42;
-
 int resend_delay = -1;
 static const char *pidfile = PATH_BABELD_PID;
 

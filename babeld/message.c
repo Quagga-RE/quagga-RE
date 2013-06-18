@@ -332,6 +332,7 @@ parse_packet(const unsigned char *from, struct interface *ifp,
     int have_hello_rtt = 0;
     /* Content of the RTT sub-TLV on IHU messages. */
     unsigned int hello_send_us = 0, hello_rtt_receive_time = 0;
+    babel_interface_nfo *babel_ifp = babel_get_if_nfo(ifp);
 
     /* We want to track exactly when we received this packet. */
     gettime(&babel_now);
@@ -636,14 +637,17 @@ parse_packet(const unsigned char *from, struct interface *ifp,
         debugf(BABEL_DEBUG_COMMON, "RTT to %s on %s sample result: %d us.\n",
                format_address(from), ifp->name, rtt);
 
-        if (valid_rtt(neigh))
+        if (valid_rtt(neigh)) {
             /* Running exponential average. */
-            neigh->rtt = (rtt_exponential_decay * MAX(rtt, 0)
-                          + (256 - rtt_exponential_decay) * neigh->rtt) / 256;
-        else
+            neigh->rtt = (babel_ifp->rtt_exponential_decay * MAX(rtt, 0)
+                          + (256 - babel_ifp->rtt_exponential_decay) *
+                          neigh->rtt);
+            neigh->rtt /= 256;
+        } else {
             /* We prefer to be conservative with new neighbours
                (higher RTT) */
             neigh->rtt = MAX(2*rtt, 0);
+        }
         neigh->rtt_time = babel_now;
     }
     return;
