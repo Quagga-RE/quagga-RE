@@ -1107,12 +1107,15 @@ static void
 show_babel_neighbour_sub (struct vty *vty, struct neighbour *neigh)
 {
     vty_out (vty,
-             "Neighbour %s dev %s reach %04x rxcost %d txcost %d%s.%s",
+             "Neighbour %s dev %s reach %04x rxcost %d txcost %d "
+             "rtt %d rttcost %d%s.%s",
              format_address(neigh->address),
              neigh->ifp->name,
              neigh->reach,
              neighbour_rxcost(neigh),
              neigh->txcost,
+             neigh->rtt,
+             neighbour_rttcost(neigh),
              if_up(neigh->ifp) ? "" : " (down)",
              VTY_NEWLINE);
 }
