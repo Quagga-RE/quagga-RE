@@ -44,6 +44,9 @@ int diversity_kind = DIVERSITY_NONE;
 int diversity_factor = BABEL_DEFAULT_DIVERSITY_FACTOR;
 int keep_unfeasible = 0;
 
+int smoothing_half_life = 0;
+static int two_to_the_one_over_hl = 0; /* 2^(1/hl) * 0x10000 */
+
 /* We maintain a list of "slots", ordered by prefix.  Every slot
    contains a linked list of the routes to this prefix, with the
    installed route, if any, at the head of the list. */
@@ -253,7 +256,7 @@ flush_all_routes()
         while(i < route_slots) {
         /* Uninstall first, to avoid calling route_lost. */
             if(routes[i]->installed)
-                uninstall_route(routes[0]);
+                uninstall_route(routes[i]);
             flush_route(routes[i]);
         }
         i--;
@@ -311,9 +314,9 @@ flush_interface_routes(struct interface *ifp, int v4only)
 void
 for_all_routes(void (*f)(struct babel_route*, void*), void *closure)
 {
-    int i;
+    int i, n = route_slots;
 
-    for(i = 0; i < route_slots; i++) {
+    for(i = 0; i < n; i++) {
         struct babel_route *r = routes[i];
         while(r) {
             (*f)(r, closure);
@@ -325,9 +328,9 @@ for_all_routes(void (*f)(struct babel_route*, void*), void *closure)
 void
 for_all_installed_routes(void (*f)(struct babel_route*, void*), void *closure)
 {
-    int i;
+    int i, n = route_slots;
 
-    for(i = 0; i < route_slots; i++) {
+    for(i = 0; i < n; i++) {
         if(routes[i]->installed)
             (*f)(routes[i], closure);
     }
@@ -471,14 +474,24 @@ change_route_metric(struct babel_route *route,
         }
     }
 
+    /* Update route->smoothed_metric using the old metric. */
+    route_smoothed_metric(route);
+
     route->refmetric = refmetric;
     route->cost = cost;
     route->add_metric = add;
+
+    if(smoothing_half_life == 0) {
+        route->smoothed_metric = route_metric(route);
+        route->smoothed_metric_time = babel_now.tv_sec;
+    }
 }
 
 static void
 retract_route(struct babel_route *route)
 {
+    /* We cannot simply remove the route from the kernel, as that might
+       cause a routing loop -- see RFC 6126 Sections 2.8 and 3.5.5. */
     change_route_metric(route, INFINITY, INFINITY, 0);
 }
 
@@ -564,6 +577,66 @@ update_feasible(struct source *src,
             (src->seqno == seqno && refmetric < src->metric));
 }
 
+void
+change_smoothing_half_life(int half_life)
+{
+    if(half_life <= 0) {
+        smoothing_half_life = 0;
+        two_to_the_one_over_hl = 0;
+        return;
+    }
+
+    smoothing_half_life = half_life;
+    switch(smoothing_half_life) {
+    case 1: two_to_the_one_over_hl = 131072; break;
+    case 2: two_to_the_one_over_hl = 92682; break;
+    case 3: two_to_the_one_over_hl = 82570; break;
+    case 4: two_to_the_one_over_hl = 77935; break;
+    default:
+        /* 2^(1/x) is 1 + log(2)/x + O(1/x^2) at infinity. */
+        two_to_the_one_over_hl = 0x10000 + 45426 / half_life;
+    }
+}
+
+/* Update the smoothed metric, return the new value. */
+int
+route_smoothed_metric(struct babel_route *route)
+{
+    int metric = route_metric(route);
+
+    if(smoothing_half_life <= 0 ||                 /* no smoothing */
+       metric >= INFINITY ||                       /* route retracted */
+       route->smoothed_metric_time > babel_now.tv_sec || /* clock stepped */
+       route->smoothed_metric == metric) {         /* already converged */
+        route->smoothed_metric = metric;
+        route->smoothed_metric_time = babel_now.tv_sec;
+    } else {
+        int diff;
+        /* We randomise the computation, to minimise global synchronisation
+           and hence oscillations. */
+        while(route->smoothed_metric_time <=
+              babel_now.tv_sec - smoothing_half_life) {
+            diff = metric - route->smoothed_metric;
+            route->smoothed_metric += roughly(diff) / 2;
+            route->smoothed_metric_time += smoothing_half_life;
+        }
+        while(route->smoothed_metric_time < babel_now.tv_sec) {
+            diff = metric - route->smoothed_metric;
+            route->smoothed_metric +=
+                roughly(diff) * (two_to_the_one_over_hl - 0x10000) / 0x10000;
+            route->smoothed_metric_time++;
+        }
+
+        diff = metric - route->smoothed_metric;
+        if(diff > -4 && diff < 4)
+            route->smoothed_metric = metric;
+    }
+
+    /* change_route_metric relies on this */
+    assert(route->smoothed_metric_time == babel_now.tv_sec);
+    return route->smoothed_metric;
+}
+
 static int
 route_acceptable(struct babel_route *route, int feasible,
                  struct neighbour *exclude)
@@ -576,6 +649,11 @@ route_acceptable(struct babel_route *route, int feasible,
         return 0;
     return 1;
 }
+
+/* Find the best route according to the weak ordering.  Any
+   linearisation of the strong ordering (see consider_route) will do,
+   we use sm <= sm'.  We could probably use a lexical ordering, but
+   that's probably overkill. */
 
 struct babel_route *
 find_best_route(const unsigned char *prefix, unsigned char plen, int feasible,
@@ -597,7 +675,7 @@ find_best_route(const unsigned char *prefix, unsigned char plen, int feasible,
     r = route->next;
     while(r) {
         if(route_acceptable(r, feasible, exclude) &&
-           (route_metric(r) < route_metric(route)))
+           (route_smoothed_metric(r) < route_smoothed_metric(route)))
             route = r;
         r = r->next;
     }
@@ -609,6 +687,7 @@ void
 update_route_metric(struct babel_route *route)
 {
     int oldmetric = route_metric(route);
+    int old_smoothed_metric = route_smoothed_metric(route);
 
     if(route_expired(route)) {
         if(route->refmetric < INFINITY) {
@@ -625,7 +704,8 @@ update_route_metric(struct babel_route *route)
                                       neigh->ifp->ifindex);
         change_route_metric(route, route->refmetric,
                             neighbour_cost(route->neigh), add_metric);
-        if(route_metric(route) != oldmetric)
+        if(route_metric(route) != oldmetric ||
+           route_smoothed_metric(route) != old_smoothed_metric)
             route_changed(route, route->src, oldmetric);
     }
 }
@@ -737,6 +817,12 @@ update_route(const unsigned char *router_id,
         if((feasible || keep_unfeasible) && refmetric < INFINITY)
             route->time = babel_now.tv_sec;
         route->seqno = seqno;
+
+        memset(&route->channels, 0, sizeof(route->channels));
+        if(channels_len > 0)
+            memcpy(&route->channels, channels,
+                   MIN(channels_len, DIVERSITY_HOPS));
+
         change_route_metric(route,
                             refmetric, neighbour_cost(neigh), add_metric);
         route->hold_time = hold_time;
@@ -776,6 +862,8 @@ update_route(const unsigned char *router_id,
         memcpy(route->nexthop, nexthop, 16);
         route->time = babel_now.tv_sec;
         route->hold_time = hold_time;
+        route->smoothed_metric = MAX(route_metric(route), INFINITY / 2);
+        route->smoothed_metric_time = babel_now.tv_sec;
         route->installed = 0;
         memset(&route->channels, 0, sizeof(route->channels));
         if(channels_len > 0)
@@ -816,7 +904,11 @@ send_unfeasible_request(struct neighbour *neigh, int force,
     }
 }
 
-/* This takes a feasible route and decides whether to install it. */
+/* This takes a feasible route and decides whether to install it.
+   This uses the strong ordering, which is defined by sm <= sm' AND
+   m <= m'.  This ordering is not total, which is what causes
+   hysteresis. */
+
 static void
 consider_route(struct babel_route *route)
 {
@@ -844,7 +936,8 @@ consider_route(struct babel_route *route)
     if(route_metric(installed) >= INFINITY)
         goto install;
 
-    if(route_metric(installed) >= route_metric(route) + 64)
+    if(route_metric(installed) >= route_metric(route) &&
+       route_smoothed_metric(installed) > route_smoothed_metric(route))
         goto install;
 
     return;
@@ -950,10 +1043,11 @@ route_changed(struct babel_route *route,
             find_best_route(route->src->prefix, route->src->plen, 1, NULL);
         if(better_route && route_metric(better_route) < route_metric(route))
             consider_route(better_route);
+    }
 
-        if(route->installed)
-            /* We didn't switch to the better route. */
-            send_triggered_update(route, oldsrc, oldmetric);
+    if(route->installed) {
+        /* We didn't change routes after all. */
+        send_triggered_update(route, oldsrc, oldmetric);
     } else {
         /* Reconsider routes even when their metric didn't decrease,
            they may not have been feasible before. */

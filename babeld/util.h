@@ -74,7 +74,7 @@ seqno_plus(unsigned short s, int plus)
     return ((s + plus) & 0xFFFF);
 }
 
-unsigned roughly(unsigned value);
+int roughly(int value);
 void timeval_minus(struct timeval *d,
                    const struct timeval *s1, const struct timeval *s2);
 unsigned timeval_minus_msec(const struct timeval *s1, const struct timeval *s2)
@@ -86,6 +86,7 @@ int timeval_compare(const struct timeval *s1, const struct timeval *s2)
     ATTRIBUTE ((pure));
 void timeval_min(struct timeval *d, const struct timeval *s);
 void timeval_min_sec(struct timeval *d, time_t secs);
+int parse_nat(const char *string) ATTRIBUTE ((pure));
 int parse_msec(const char *string) ATTRIBUTE ((pure));
 int in_prefix(const unsigned char *restrict address,
               const unsigned char *restrict prefix, unsigned char plen)

@@ -744,7 +744,11 @@ interface_recalculate(struct interface *ifp)
     }
     tmp = NULL;
 
-    resize_receive_buffer(mtu);
+    rc = resize_receive_buffer(mtu);
+    if(rc < 0)
+        zlog_warn("couldn't resize "
+                  "receive buffer for interface %s (%d) (%d bytes).\n",
+                  ifp->name, ifp->ifindex, mtu);
 
     memset(&mreq, 0, sizeof(mreq));
     memcpy(&mreq.ipv6mr_multiaddr, protocol_group, 16);

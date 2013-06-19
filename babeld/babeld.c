@@ -102,6 +102,12 @@ babel_config_write (struct vty *vty)
         vty_out (vty, " babel resend-delay %u%s", resend_delay, VTY_NEWLINE);
         lines++;
     }
+    if (smoothing_half_life != BABEL_DEFAULT_SMOOTHING_HALF_LIFE)
+    {
+        vty_out (vty, " babel smoothing-half-life %u%s",
+                 smoothing_half_life, VTY_NEWLINE);
+        lines++;
+    }
     lines += babel_auth_config_write (vty);
     /* list enabled interfaces */
     lines = 1 + babel_enable_if_config_write (vty);
@@ -344,7 +350,8 @@ babel_main_loop(struct thread *thread)
         if(timeval_compare(&check_neighbours_timeout, &babel_now) < 0) {
             int msecs;
             msecs = check_neighbours();
-            msecs = MAX(msecs, 10);
+            /* Multiply by 3/2 to allow neighbours to expire. */
+            msecs = MAX(3 * msecs / 2, 10);
             schedule_neighbours_check(msecs, 1);
         }
 
@@ -503,13 +510,12 @@ schedule_auth_housekeeping(void)
 #endif /* HAVE_LIBGCRYPT */
 }
 
-/* Schedule a neighbours check after roughly 3/2 times msecs have elapsed. */
 void
 schedule_neighbours_check(int msecs, int override)
 {
     struct timeval timeout;
 
-    timeval_add_msec(&timeout, &babel_now, roughly(msecs * 3 / 2));
+    timeval_add_msec(&timeout, &babel_now, msecs);
     if(override)
         check_neighbours_timeout = timeout;
     else
@@ -697,6 +703,22 @@ DEFUN (babel_set_resend_delay,
     return CMD_SUCCESS;
 }
 
+/* [Babel Command] */
+DEFUN (babel_set_smoothing_half_life,
+       babel_set_smoothing_half_life_cmd,
+       "babel smoothing-half-life <0-65534>",
+       "Babel commands\n"
+       "Smoothing half-life\n"
+       "Seconds (0 to disable)\n")
+{
+    int seconds;
+
+    VTY_GET_INTEGER_RANGE("seconds", seconds, argv[0], 0, 0xFFFE);
+
+    change_smoothing_half_life(seconds);
+    return CMD_SUCCESS;
+}
+
 void
 babeld_quagga_init(void)
 {
@@ -711,6 +733,7 @@ babeld_quagga_init(void)
     install_element(BABEL_NODE, &no_babel_diversity_cmd);
     install_element(BABEL_NODE, &babel_diversity_factor_cmd);
     install_element(BABEL_NODE, &babel_set_resend_delay_cmd);
+    install_element(BABEL_NODE, &babel_set_smoothing_half_life_cmd);
 
     babel_if_init();
 

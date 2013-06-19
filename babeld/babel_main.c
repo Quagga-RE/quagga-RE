@@ -243,6 +243,7 @@ babel_init(int argc, char **argv)
     keychain_init();
 
     resend_delay = BABEL_DEFAULT_RESEND_DELAY;
+    change_smoothing_half_life(BABEL_DEFAULT_SMOOTHING_HALF_LIFE);
 
     babel_replace_by_null(STDIN_FILENO);
 

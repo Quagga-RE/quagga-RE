@@ -292,4 +292,3 @@ read_random_bytes(void *buf, size_t len)
     }
     return rc;
 }
-
