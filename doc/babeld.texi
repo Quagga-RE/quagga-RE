@@ -222,6 +222,14 @@ request or update will be resent.  The default is 2000@dmn{ms}.  You
 probably don't want to tweak this value.
 @end deffn
 
+@deffn {Babel Command} {babel smoothing-half-life <0-65534>}
+Specifies the time constant, in seconds, of the smoothing algorithm
+used for implementing hysteresis.  Larger values reduce route
+oscillation at the cost of very slightly increasing convergence time.
+The value 0 disables hysteresis, and is suitable for wired networks.
+The default is 4@dmn{s}.
+@end deffn
+
 @deffn {Babel Command} {anm-timeout <5-4294967295>} {}
 @deffnx {Babel Command} {no anm-timeout [<5-4294967295>]} {}
 Specifies the time in seconds, for which a record about a formerly active
