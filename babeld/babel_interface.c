@@ -568,10 +568,11 @@ babel_csa_item_free (void * node)
 
 DEFUN (babel_authentication_mode_keychain,
        babel_authentication_mode_keychain_cmd,
-       "babel authentication mode (sha256|sha384|sha512|rmd160|whirlpool) key-chain LINE",
+       "babel authentication mode (sha1|sha256|sha384|sha512|rmd160|whirlpool) key-chain LINE",
        "Babel interface commands\n"
        "Packet authentication\n"
        "Authentication mode\n"
+       "HMAC-SHA-1\n"
        "HMAC-SHA-256\n"
        "HMAC-SHA-384\n"
        "HMAC-SHA-512\n"
@@ -604,11 +605,12 @@ DEFUN (babel_authentication_mode_keychain,
 
 DEFUN (no_babel_authentication_mode_keychain,
        no_babel_authentication_mode_keychain_cmd,
-       "no babel authentication mode (sha256|sha384|sha512|rmd160|whirlpool) key-chain LINE",
+       "no babel authentication mode (sha1|sha256|sha384|sha512|rmd160|whirlpool) key-chain LINE",
        NO_STR
        "Babel interface commands\n"
        "Packet authentication\n"
        "Authentication mode\n"
+       "HMAC-SHA-1\n"
        "HMAC-SHA-256\n"
        "HMAC-SHA-384\n"
        "HMAC-SHA-512\n"

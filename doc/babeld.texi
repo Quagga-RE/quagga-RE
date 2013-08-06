@@ -45,7 +45,7 @@ draft-ovsienko-babel-hmac-authentication (work in progress). This mechanism is
 implemented with the following set of parameters:
 @itemize @bullet
 @item
-Supported hash algorithms: RIPEMD-160, SHA-256, SHA-384, SHA-512 and Whirlpool.
+Supported hash algorithms: RIPEMD-160, SHA-1, SHA-256, SHA-384, SHA-512 and Whirlpool.
 @item
 MaxDigestsIn: fixed to 4 at compile-time.
 @item
@@ -180,9 +180,9 @@ A HMAC algorithm uses a secret key and a compound TS/PC number to produce one
 or more digests for each protocol packet.
 @itemize @bullet
 @item
-@code{sha256/sha384/sha512}:
-SHA-256, SHA-384 and SHA-512 hash functions respectively, which belong to SHA-2
-family of hash functions and produce a digest 256-bit, 384-bit and 512-bit long
+@code{sha1/sha256/sha384/sha512}:
+SHA-1, SHA-256, SHA-384 and SHA-512 hash functions respectively, which belong to SHA-2
+family of hash functions and produce a digest 160-bit, 256-bit, 384-bit and 512-bit long
 respectively.
 @item
 @code{rmd160}:
