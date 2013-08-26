@@ -38,8 +38,8 @@ struct babel_auth_stats
   unsigned long auth_sent;
   unsigned long auth_sent_ng_nokeys;     /* ESA list empty in Tx              */
   unsigned long auth_recv_ng_nokeys;     /* ESA list empty on Rx              */
-  unsigned long auth_recv_ng_no_tspc;    /* no TS/PC TLVs in the packet       */
-  unsigned long auth_recv_ng_tspc;       /* 1st TS/PC TLV fails ANM check     */
+  unsigned long auth_recv_ng_amnt_tspc;  /* <> 1 TS/PC TLVs in the packet     */
+  unsigned long auth_recv_ng_tspc;       /* the TS/PC TLV fails ANM check     */
   unsigned long auth_recv_ng_hmac;       /* no HMAC TLV passes ESA check      */
   unsigned long auth_recv_ok;
   unsigned long internal_err;

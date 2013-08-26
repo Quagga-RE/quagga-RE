@@ -287,8 +287,8 @@ babel_esalist_derive
   return unique_esas;
 }
 
-/* Return "stream getp" coordinate of PC followed by TS, if the first TS/PC TLV
- * of the given packet exists and passes a constraint check against stored TS/PC
+/* Return "stream getp" coordinate of PC followed by TS, if exactly 1 TS/PC TLV
+ * exists in the given packet and passes a constraint check against stored TS/PC
  * values for the address of packet sender. Return -1 otherwise and update two
  * pools of stats counters. */
 static int
@@ -299,6 +299,7 @@ babel_auth_check_tspc (struct babel_auth_stats *if_stats, struct stream *packet,
   u_int8_t tlv_type, tlv_length;
   u_int16_t tlv_pc;
   u_int32_t tlv_ts;
+  u_int seen_tspc_tlv = 0;
 
   stream_set_getp (packet, 4);
   while (STREAM_READABLE (packet))
@@ -313,24 +314,28 @@ babel_auth_check_tspc (struct babel_auth_stats *if_stats, struct stream *packet,
       continue;
     }
     /* TS/PC TLV */
+    if (++seen_tspc_tlv > 1)
+      break;
     tlv_pc = stream_getw (packet);
     tlv_ts = stream_getl (packet);
-    if (tlv_ts > stor_ts || (tlv_ts == stor_ts && tlv_pc > stor_pc))
-      ret = stream_get_getp (packet) - 6;
-    else
-    {
-      stats.auth_recv_ng_tspc++;
-      if_stats->auth_recv_ng_tspc++;
-    }
-    debugf (BABEL_DEBUG_AUTH, "%s: received TS/PC is (%u/%u), stored is (%u/%u), check %s", __func__,
-            tlv_ts, tlv_pc, stor_ts, stor_pc, ret == -1 ? "failed" : "OK");
-    /* only the 1st TLV matters */
-    return ret;
+    ret = stream_get_getp (packet) - 6;
   }
-  stats.auth_recv_ng_no_tspc++;
-  if_stats->auth_recv_ng_no_tspc++;
-  debugf (BABEL_DEBUG_AUTH, "%s: no TS/PC TLV in the packet, check failed", __func__);
-  return -1;
+  if (seen_tspc_tlv != 1)
+  {
+    stats.auth_recv_ng_amnt_tspc++;
+    if_stats->auth_recv_ng_amnt_tspc++;
+    debugf (BABEL_DEBUG_AUTH, "%s: not exactly 1 TS/PC TLV in the packet, check failed", __func__);
+    return -1;
+  }
+  if (tlv_ts < stor_ts || (tlv_ts == stor_ts && tlv_pc <= stor_pc))
+  {
+    ret = -1;
+    stats.auth_recv_ng_tspc++;
+    if_stats->auth_recv_ng_tspc++;
+  }
+  debugf (BABEL_DEBUG_AUTH, "%s: received TS/PC is (%u/%u), stored is (%u/%u), check %s", __func__,
+          tlv_ts, tlv_pc, stor_ts, stor_pc, ret == -1 ? "failed" : "OK");
+  return ret;
 }
 
 /* Make a copy of input packet, pad its HMAC TLVs and return the padded copy. */
@@ -809,7 +814,7 @@ show_auth_stats_sub (struct vty *vty, const struct babel_auth_stats stats)
   vty_out (vty, format_lu, "Authenticated Tx out of keys", stats.auth_sent_ng_nokeys, VTY_NEWLINE);
   vty_out (vty, format_lu, "Authenticated Rx OK", stats.auth_recv_ok, VTY_NEWLINE);
   vty_out (vty, format_lu, "Authenticated Rx out of keys", stats.auth_recv_ng_nokeys, VTY_NEWLINE);
-  vty_out (vty, format_lu, "Authenticated Rx missing TS/PC", stats.auth_recv_ng_no_tspc, VTY_NEWLINE);
+  vty_out (vty, format_lu, "Authenticated Rx <> 1 TS/PC", stats.auth_recv_ng_amnt_tspc, VTY_NEWLINE);
   vty_out (vty, format_lu, "Authenticated Rx bad TS/PC", stats.auth_recv_ng_tspc, VTY_NEWLINE);
   vty_out (vty, format_lu, "Authenticated Rx bad HMAC", stats.auth_recv_ng_hmac, VTY_NEWLINE);
   vty_out (vty, format_lu, "Internal errors", stats.internal_err, VTY_NEWLINE);
