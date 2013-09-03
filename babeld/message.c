@@ -545,6 +545,22 @@ check_bucket(struct interface *ifp)
     }
 }
 
+static int
+fill_rtt_message(struct interface *ifp)
+{
+    babel_interface_nfo *babel_ifp = babel_get_if_nfo(ifp);
+    if(babel_ifp->buffered_hello >= 0) {
+        unsigned int time;
+        /* Change the type of sub-TLV. */
+        babel_ifp->sendbuf[babel_ifp->buffered_hello + 8] = SUBTLV_TIMESTAMP;
+        gettime(&babel_now);
+        time = time_us(babel_now);
+        DO_HTONL(babel_ifp->sendbuf + babel_ifp->buffered_hello + 10, time);
+        return 1;
+    }
+    return 0;
+}
+
 void
 flushbuf(struct interface *ifp)
 {
@@ -570,6 +586,7 @@ flushbuf(struct interface *ifp)
             assert (babel_ifp->buffered <= babel_ifp->bufsize);
 #endif /* HAVE_LIBGCRYPT */
             DO_HTONS(packet_header + 2, babel_ifp->buffered);
+            fill_rtt_message(ifp);
             rc = babel_send(protocol_socket,
                             packet_header, sizeof(packet_header),
                             babel_ifp->sendbuf, babel_ifp->buffered,
@@ -778,12 +795,17 @@ send_hello_noupdate(struct interface *ifp, unsigned interval)
     debugf(BABEL_DEBUG_COMMON,"Sending hello %d (%d) to %s.",
            babel_ifp->hello_seqno, interval, ifp->name);
 
-    start_message(ifp, MESSAGE_HELLO, 6);
+    start_message(ifp, MESSAGE_HELLO, 12);
     babel_ifp->buffered_hello = babel_ifp->buffered - 2;
     accumulate_short(ifp, 0);
     accumulate_short(ifp, babel_ifp->hello_seqno);
     accumulate_short(ifp, interval > 0xFFFF ? 0xFFFF : interval);
-    end_message(ifp, MESSAGE_HELLO, 6);
+    /* Sub-TLV containing the local time of emission. We use a Pad4
+       sub-TLV, which we'll fill just before sending. */
+    accumulate_byte(ifp, SUBTLV_PADN);
+    accumulate_byte(ifp, 4);
+    accumulate_int(ifp, 0);
+    end_message(ifp, MESSAGE_HELLO, 12);
 }
 
 void
