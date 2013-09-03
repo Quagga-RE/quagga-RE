@@ -300,9 +300,29 @@ neighbour_rxcost(struct neighbour *neigh)
 }
 
 unsigned
+neighbour_rttcost(struct neighbour *neigh)
+{
+    struct interface *ifp = neigh->ifp;
+    babel_interface_nfo *babel_ifp = babel_get_if_nfo(ifp);
+
+    if(!babel_ifp->max_rtt_penalty || !valid_rtt(neigh))
+        return 0;
+
+    /* Function: linear behaviour between rtt_min and rtt_max. */
+    if(neigh->rtt <= babel_ifp->rtt_min) {
+        return 0;
+    } else if(neigh->rtt <= babel_ifp->rtt_max) {
+        return (babel_ifp->max_rtt_penalty * (neigh->rtt - babel_ifp->rtt_min) /
+                (babel_ifp->rtt_max - babel_ifp->rtt_min));
+    } else {
+        return babel_ifp->max_rtt_penalty;
+    }
+}
+
+unsigned
 neighbour_cost(struct neighbour *neigh)
 {
-    unsigned a, b;
+    unsigned a, b, cost;
 
     if(!if_up(neigh->ifp))
         return INFINITY;
@@ -318,7 +338,7 @@ neighbour_cost(struct neighbour *neigh)
 
     if(!(babel_get_if_nfo(neigh->ifp)->flags & BABEL_IF_LQ)
        || (a < 256 && b < 256)) {
-        return a;
+        cost = a;
     } else {
         /* a = 256/alpha, b = 256/beta, where alpha and beta are the expected
            probabilities of a packet getting through in the direct and reverse
@@ -327,8 +347,12 @@ neighbour_cost(struct neighbour *neigh)
         b = MAX(b, 256);
         /* 1/(alpha * beta), which is just plain ETX. */
         /* Since a and b are capped to 16 bits, overflow is impossible. */
-        return MIN((a * b + 128) >> 8, INFINITY);
+        cost = (a * b + 128) >> 8;
     }
+
+    cost += neighbour_rttcost(neigh);
+
+    return MIN(cost, INFINITY);
 }
 
 int

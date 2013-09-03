@@ -64,6 +64,10 @@ struct babel_interface {
     unsigned short hello_seqno;
     unsigned hello_interval;
     unsigned update_interval;
+    /* Parameters for computing the cost associated to RTT. */
+    unsigned int rtt_min;
+    unsigned int rtt_max;
+    unsigned int max_rtt_penalty;
 
     /* For filter type slot. */
     struct access_list *list[DISTRIBUTE_MAX];                 /* Access-list. */
