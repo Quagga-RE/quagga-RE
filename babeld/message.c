@@ -671,6 +671,14 @@ accumulate_short(struct interface *ifp, unsigned short value)
 }
 
 static void
+accumulate_int(struct interface *ifp, unsigned int value)
+{
+    babel_interface_nfo *babel_ifp = babel_get_if_nfo(ifp);
+    DO_HTONL(babel_ifp->sendbuf + babel_ifp->buffered, value);
+    babel_ifp->buffered += 4;
+}
+
+static void
 accumulate_bytes(struct interface *ifp,
                  const unsigned char *value, unsigned len)
 {
@@ -722,6 +730,13 @@ accumulate_unicast_short(struct neighbour *neigh, unsigned short value)
 {
     DO_HTONS(unicast_buffer + unicast_buffered, value);
     unicast_buffered += 2;
+}
+
+static void
+accumulate_unicast_int(struct neighbour *neigh, unsigned int value)
+{
+    DO_HTONL(unicast_buffer + unicast_buffered, value);
+    unicast_buffered += 4;
 }
 
 static void
