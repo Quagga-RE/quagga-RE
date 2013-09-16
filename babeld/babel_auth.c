@@ -139,7 +139,7 @@ babel_auth_do_housekeeping (struct thread *thread)
   char buffer[INET6_ADDRSTRLEN];
 
   for (ALL_LIST_ELEMENTS (anmlist, node, nextnode, anm))
-    if (anm->last_recv + anm_timeout < now)
+    if (anm->last_recv + anm_timeout < (unsigned)now)
     {
       if (UNLIKELY (debug & BABEL_DEBUG_AUTH))
       {
@@ -595,7 +595,7 @@ babel_auth_bump_tspc (struct babel_interface *babel_ifp, const time_t now)
   switch (ts_base)
   {
   case BABEL_TS_BASE_UNIX:
-    if (now > babel_ifp->auth_timestamp)
+    if ((unsigned)now > babel_ifp->auth_timestamp)
     {
       babel_ifp->auth_timestamp = now;
       babel_ifp->auth_packetcounter = 0;
