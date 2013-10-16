@@ -247,7 +247,7 @@ mask_prefix(unsigned char *restrict ret,
     return ret;
 }
 
-static const unsigned char v4prefix[16] =
+const unsigned char v4prefix[16] =
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF, 0, 0, 0, 0 };
 
 static const unsigned char llprefix[16] =
@@ -310,8 +310,7 @@ parse_address(const char *address, unsigned char *addr_r, int *af_r)
 
     rc = inet_pton(AF_INET, address, &ina);
     if(rc > 0) {
-        memcpy(addr_r, v4prefix, 12);
-        memcpy(addr_r + 12, &ina, 4);
+        v4tov6(addr_r, (const unsigned char *)&ina);
         if(af_r) *af_r = AF_INET;
         return 0;
     }
@@ -408,8 +407,7 @@ v4tov6(unsigned char *dst, const unsigned char *src)
 void
 inaddr_to_uchar(unsigned char *dest, const struct in_addr *src)
 {
-    memcpy(dest, v4prefix, 12);
-    memcpy(dest + 12, src, 4);
+    v4tov6(dest, (const unsigned char *)src);
     assert(v4mapped(dest));
 }
 
