@@ -988,6 +988,7 @@ flush_unicast(int dofree)
         assert (unicast_buffered <= babel_get_if_nfo (unicast_neighbour->ifp)->bufsize);
 #endif /* HAVE_LIBGCRYPT */
         DO_HTONS(packet_header + 2, unicast_buffered);
+        fill_rtt_message(unicast_neighbour->ifp);
         rc = babel_send(protocol_socket,
                         packet_header, sizeof(packet_header),
                         unicast_buffer, unicast_buffered,
