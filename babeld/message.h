@@ -30,6 +30,9 @@ THE SOFTWARE.
 #define BUCKET_TOKENS_MAX 200
 #define BUCKET_TOKENS_PER_SEC 40
 
+/* A registry of assigned TLV and sub-TLV types is available at
+   http://www.pps.univ-paris-diderot.fr/~jch/software/babel/babel-tlv-registry.text
+*/
 #define MESSAGE_PAD1 0
 #define MESSAGE_PADN 1
 #define MESSAGE_ACK_REQ 2
@@ -45,6 +48,10 @@ THE SOFTWARE.
 #define MESSAGE_HMAC 12
 #define MESSAGE_MAX 12
 
+/* Protocol extension through sub-TLVs. */
+#define SUBTLV_PAD1 0
+#define SUBTLV_PADN 1
+#define SUBTLV_DIVERSITY 2 /* Also known as babelz. */
 
 extern unsigned short myseqno;
 
