@@ -56,6 +56,25 @@ static struct {
     {0, 0, NULL}
 };
 
+static struct {
+    int str_min_len;
+    const char *str;
+} proto_redistnum_type[ZEBRA_ROUTE_MAX] = {
+    [ZEBRA_ROUTE_BABEL]   = {2, "babel"},
+    [ZEBRA_ROUTE_BGP]     = {2, "bgp"},
+    [ZEBRA_ROUTE_CONNECT] = {1, "connected"},
+    [ZEBRA_ROUTE_HSLS]    = {1, "hsls"},
+    [ZEBRA_ROUTE_ISIS]    = {1, "isis"},
+    [ZEBRA_ROUTE_KERNEL]  = {1, "kernel"},
+    [ZEBRA_ROUTE_OLSR]    = {2, "olsr"},
+    [ZEBRA_ROUTE_OSPF]    = {2, "ospf"},
+    [ZEBRA_ROUTE_OSPF6]   = {5, "ospf6"},
+    [ZEBRA_ROUTE_RIP]     = {1, "rip"},
+    [ZEBRA_ROUTE_RIPNG]   = {4, "ripng"},
+    [ZEBRA_ROUTE_STATIC]  = {2, "static"},
+    [ZEBRA_ROUTE_SYSTEM]  = {2, "system"},
+};
+
 /* Zebra node structure. */
 static struct cmd_node zebra_node =
 {
@@ -171,6 +190,25 @@ babel_zebra_read_ipv4 (int command, struct zclient *zclient,
     return 0;
 }
 
+static int
+babel_proto_redistnum(const char *s)
+{
+    int i;
+    if (! s)
+        return -1;
+    int len = strlen(s);
+
+    for (i = 0; i < ZEBRA_ROUTE_MAX; i++) {
+        if (len <= (int)strlen(proto_redistnum_type[i].str) &&
+            strncmp(proto_redistnum_type[i].str, s,
+                    proto_redistnum_type[i].str_min_len) == 0) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
 /* [Babel Command] */
 DEFUN (babel_redistribute_type,
        babel_redistribute_type_cmd,
@@ -180,10 +218,7 @@ DEFUN (babel_redistribute_type,
 {
     int type;
 
-    type = proto_redistnum(AFI_IP6, argv[0]);
-
-    if (type < 0)
-        type = proto_redistnum(AFI_IP, argv[0]);
+    type = babel_proto_redistnum(argv[0]);
 
     if (type < 0) {
         vty_out(vty, "Invalid type %s%s", argv[0], VTY_NEWLINE);
@@ -204,10 +239,7 @@ DEFUN (no_babel_redistribute_type,
 {
     int type;
 
-    type = proto_redistnum(AFI_IP6, argv[0]);
-
-    if (type < 0)
-        type = proto_redistnum(AFI_IP, argv[0]);
+    type = babel_proto_redistnum(argv[0]);
 
     if (type < 0) {
         vty_out(vty, "Invalid type %s%s", argv[0], VTY_NEWLINE);
