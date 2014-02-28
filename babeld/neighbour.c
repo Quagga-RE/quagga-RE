@@ -312,8 +312,12 @@ neighbour_rttcost(struct neighbour *neigh)
     if(neigh->rtt <= babel_ifp->rtt_min) {
         return 0;
     } else if(neigh->rtt <= babel_ifp->rtt_max) {
-        return (babel_ifp->max_rtt_penalty * (neigh->rtt - babel_ifp->rtt_min) /
-                (babel_ifp->rtt_max - babel_ifp->rtt_min));
+        unsigned long long tmp =
+            (unsigned long long)babel_ifp->max_rtt_penalty *
+            (neigh->rtt - babel_ifp->rtt_min) /
+            (babel_ifp->rtt_max - babel_ifp->rtt_min);
+        assert((tmp & 0x7FFFFFFF) == tmp);
+        return tmp;
     } else {
         return babel_ifp->max_rtt_penalty;
     }
