@@ -334,7 +334,7 @@ parse_packet(const unsigned char *from, struct interface *ifp,
     unsigned int hello_send_us = 0, hello_rtt_receive_time = 0;
     babel_interface_nfo *babel_ifp = babel_get_if_nfo(ifp);
 
-    if(babel_ifp->enable_timestamps) {
+    if(babel_ifp->flags & BABEL_IF_TIMESTAMPS) {
         /* We want to track exactly when we received this packet. */
         gettime(&babel_now);
     }
@@ -693,7 +693,8 @@ static int
 fill_rtt_message(struct interface *ifp)
 {
     babel_interface_nfo *babel_ifp = babel_get_if_nfo(ifp);
-    if(babel_ifp->enable_timestamps && (babel_ifp->buffered_hello >= 0)) {
+    if((babel_ifp->flags & BABEL_IF_TIMESTAMPS) &&
+       (babel_ifp->buffered_hello >= 0)) {
         if(babel_ifp->sendbuf[babel_ifp->buffered_hello + 8] == SUBTLV_PADN &&
            babel_ifp->sendbuf[babel_ifp->buffered_hello + 9] == 4) {
             unsigned int time;
@@ -948,19 +949,21 @@ send_hello_noupdate(struct interface *ifp, unsigned interval)
     debugf(BABEL_DEBUG_COMMON,"Sending hello %d (%d) to %s.",
            babel_ifp->hello_seqno, interval, ifp->name);
 
-    start_message(ifp, MESSAGE_HELLO, babel_ifp->enable_timestamps ? 12 : 6);
+    start_message(ifp, MESSAGE_HELLO,
+                  (babel_ifp->flags & BABEL_IF_TIMESTAMPS) ? 12 : 6);
     babel_ifp->buffered_hello = babel_ifp->buffered - 2;
     accumulate_short(ifp, 0);
     accumulate_short(ifp, babel_ifp->hello_seqno);
     accumulate_short(ifp, interval > 0xFFFF ? 0xFFFF : interval);
-    if(babel_ifp->enable_timestamps) {
+    if(babel_ifp->flags & BABEL_IF_TIMESTAMPS) {
         /* Sub-TLV containing the local time of emission. We use a
            Pad4 sub-TLV, which we'll fill just before sending. */
         accumulate_byte(ifp, SUBTLV_PADN);
         accumulate_byte(ifp, 4);
         accumulate_int(ifp, 0);
     }
-    end_message(ifp, MESSAGE_HELLO, babel_ifp->enable_timestamps ? 12 : 6);
+    end_message(ifp, MESSAGE_HELLO,
+                (babel_ifp->flags & BABEL_IF_TIMESTAMPS) ? 12 : 6);
 }
 
 void
@@ -1505,7 +1508,7 @@ send_ihu(struct neighbour *neigh, struct interface *ifp)
 
     ll = linklocal(neigh->address);
 
-    if(babel_ifp->enable_timestamps && neigh->hello_send_us
+    if((babel_ifp->flags & BABEL_IF_TIMESTAMPS) && neigh->hello_send_us
        /* Checks whether the RTT data is not too old to be sent. */
        && timeval_minus_msec(&babel_now,
                              &neigh->hello_rtt_receive_time) < 1000000) {

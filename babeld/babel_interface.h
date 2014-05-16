@@ -64,7 +64,6 @@ struct babel_interface {
     unsigned short hello_seqno;
     unsigned hello_interval;
     unsigned update_interval;
-    int enable_timestamps;
     /* A higher value means we forget old RTT samples faster. Must be
        between 1 and 256, inclusive. */
     unsigned int rtt_exponential_decay;
@@ -95,6 +94,7 @@ static inline babel_interface_nfo* babel_get_if_nfo(struct interface *ifp)
 #define BABEL_IF_SPLIT_HORIZON (1 << 2)
 #define BABEL_IF_LQ            (1 << 3)
 #define BABEL_IF_FARAWAY       (1 << 4)
+#define BABEL_IF_TIMESTAMPS    (1 << 5)
 
 /* Only INTERFERING can appear on the wire. */
 #define BABEL_IF_CHANNEL_UNKNOWN 0

@@ -586,7 +586,7 @@ DEFUN (babel_set_enable_timestamps,
     babel_ifp = babel_get_if_nfo(ifp);
     assert (babel_ifp != NULL);
 
-    babel_ifp->enable_timestamps = 1;
+    babel_ifp->flags |= BABEL_IF_TIMESTAMPS;
     return CMD_SUCCESS;
 }
 
@@ -604,7 +604,7 @@ DEFUN (no_babel_set_enable_timestamps,
     babel_ifp = babel_get_if_nfo(ifp);
     assert (babel_ifp != NULL);
 
-    babel_ifp->enable_timestamps = 0;
+    babel_ifp->flags &= ~BABEL_IF_TIMESTAMPS;
     return CMD_SUCCESS;
 }
 
@@ -1584,7 +1584,6 @@ babel_interface_allocate (void)
     babel_ifp->rtt_min = 10000;
     babel_ifp->rtt_max = 120000;
     babel_ifp->max_rtt_penalty = 150;
-    babel_ifp->enable_timestamps = 0;
     babel_ifp->hello_interval = BABEL_DEFAULT_HELLO_INTERVAL;
     babel_ifp->update_interval = BABEL_DEFAULT_UPDATE_INTERVAL;
     babel_ifp->channel = BABEL_IF_CHANNEL_INTERFERING;
