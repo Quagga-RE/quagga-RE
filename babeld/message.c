@@ -334,8 +334,10 @@ parse_packet(const unsigned char *from, struct interface *ifp,
     unsigned int hello_send_us = 0, hello_rtt_receive_time = 0;
     babel_interface_nfo *babel_ifp = babel_get_if_nfo(ifp);
 
-    /* We want to track exactly when we received this packet. */
-    gettime(&babel_now);
+    if(babel_ifp->enable_timestamps) {
+        /* We want to track exactly when we received this packet. */
+        gettime(&babel_now);
+    }
 
     if(!linklocal(from)) {
         zlog_err("Received packet from non-local address %s.",
