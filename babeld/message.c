@@ -692,13 +692,22 @@ fill_rtt_message(struct interface *ifp)
 {
     babel_interface_nfo *babel_ifp = babel_get_if_nfo(ifp);
     if(babel_ifp->enable_timestamps && (babel_ifp->buffered_hello >= 0)) {
-        unsigned int time;
-        /* Change the type of sub-TLV. */
-        babel_ifp->sendbuf[babel_ifp->buffered_hello + 8] = SUBTLV_TIMESTAMP;
-        gettime(&babel_now);
-        time = time_us(babel_now);
-        DO_HTONL(babel_ifp->sendbuf + babel_ifp->buffered_hello + 10, time);
-        return 1;
+        if(babel_ifp->sendbuf[babel_ifp->buffered_hello + 8] == SUBTLV_PADN &&
+           babel_ifp->sendbuf[babel_ifp->buffered_hello + 9] == 4) {
+            unsigned int time;
+            /* Change the type of sub-TLV. */
+            babel_ifp->sendbuf[babel_ifp->buffered_hello + 8] =
+                SUBTLV_TIMESTAMP;
+            gettime(&babel_now);
+            time = time_us(babel_now);
+            DO_HTONL(babel_ifp->sendbuf + babel_ifp->buffered_hello + 10, time);
+            return 1;
+        } else {
+            fprintf(stderr,
+                    "No space left for timestamp sub-TLV "
+                    "(this shouldn't happen)\n");
+            return -1;
+        }
     }
     return 0;
 }
