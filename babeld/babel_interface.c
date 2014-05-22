@@ -488,9 +488,9 @@ DEFUN (babel_set_rxcost,
     return CMD_SUCCESS;
 }
 
-DEFUN (babel_set_rtt_exponential_decay,
-       babel_set_rtt_exponential_decay_cmd,
-       "babel rtt-exponential-decay <1-256>",
+DEFUN (babel_set_rtt_decay,
+       babel_set_rtt_decay_cmd,
+       "babel rtt-decay <1-256>",
        "Babel interface commands\n"
        "Decay factor for exponential moving average of RTT samples\n"
        "Units of 1/256")
@@ -505,7 +505,7 @@ DEFUN (babel_set_rtt_exponential_decay,
     babel_ifp = babel_get_if_nfo(ifp);
     assert (babel_ifp != NULL);
 
-    babel_ifp->rtt_exponential_decay = decay;
+    babel_ifp->rtt_decay = decay;
     return CMD_SUCCESS;
 }
 
@@ -1406,7 +1406,7 @@ babel_if_init ()
     install_element(INTERFACE_NODE, &babel_set_update_interval_cmd);
     install_element(INTERFACE_NODE, &babel_set_rxcost_cmd);
     install_element(INTERFACE_NODE, &babel_set_channel_cmd);
-    install_element(INTERFACE_NODE, &babel_set_rtt_exponential_decay_cmd);
+    install_element(INTERFACE_NODE, &babel_set_rtt_decay_cmd);
     install_element(INTERFACE_NODE, &babel_set_rtt_min_cmd);
     install_element(INTERFACE_NODE, &babel_set_rtt_max_cmd);
     install_element(INTERFACE_NODE, &babel_set_max_rtt_penalty_cmd);

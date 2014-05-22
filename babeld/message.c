@@ -644,9 +644,8 @@ parse_packet(const unsigned char *from, struct interface *ifp,
         old_rttcost = neighbour_rttcost(neigh);
         if (valid_rtt(neigh)) {
             /* Running exponential average. */
-            smoothed_rtt = (babel_ifp->rtt_exponential_decay * rtt
-                            + (256 - babel_ifp->rtt_exponential_decay) *
-                            neigh->rtt);
+            smoothed_rtt = (babel_ifp->rtt_decay * rtt +
+			    (256 - babel_ifp->rtt_decay) * neigh->rtt);
             /* Rounding (up or down) to get closer to the sample. */
             neigh->rtt = (neigh->rtt >= rtt) ? smoothed_rtt / 256 :
                 (smoothed_rtt + 255) / 256;
