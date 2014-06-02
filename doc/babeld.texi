@@ -170,6 +170,29 @@ networks, acting directly on the cost using route maps is a better
 technique.
 @end deffn
 
+@deffn {Interface Command} {babel rtt-exponential-decay <1-256>}
+This specifies the decay factor for the exponential moving average of
+RTT samples, in units of 1/256.  Higher values discard old samples
+faster.  The default is 42.
+@end deffn
+
+@deffn {Interface Command} {babel rtt-min <1-65535>}
+This specifies the minimum RTT, in milliseconds, starting from which we
+increase the cost to a neighbour. The additional cost is linear in (rtt
+- rtt-min ).  The default is 10@dmn{ms}.
+@end deffn
+
+@deffn {Interface Command} {babel rtt-max <1-65535>}
+This specifies the maximum RTT, in milliseconds, above which we don't
+increase the cost to a neighbour. The default is 120@dmn{ms}.
+@end deffn
+
+@deffn {Interface Command} {babel max-rtt-penalty <0-65535>}
+This specifies the maximum cost added to a neighbour because of RTT,
+i.e. when the RTT is higher or equal than rtt-max.  The default is 0,
+which effectively disables the use of a RTT-based cost.
+@end deffn
+
 @deffn {Interface Command} {babel authentication mode @var{authmode} key-chain @var{keychain}} {}
 @deffnx {Interface Command} {no babel authentication mode @var{authmode} key-chain @var{keychain}} {}
 Manage (add or remove) configured security associations (CSAs) for the current

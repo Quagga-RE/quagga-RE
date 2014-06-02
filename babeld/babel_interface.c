@@ -488,6 +488,90 @@ DEFUN (babel_set_rxcost,
     return CMD_SUCCESS;
 }
 
+DEFUN (babel_set_rtt_exponential_decay,
+       babel_set_rtt_exponential_decay_cmd,
+       "babel rtt-exponential-decay <1-256>",
+       "Babel interface commands\n"
+       "Decay factor for exponential moving average of RTT samples\n"
+       "Units of 1/256")
+{
+    struct interface *ifp;
+    babel_interface_nfo *babel_ifp;
+    int decay;
+
+    VTY_GET_INTEGER_RANGE("units", decay, argv[0], 1, 256);
+
+    ifp = vty->index;
+    babel_ifp = babel_get_if_nfo(ifp);
+    assert (babel_ifp != NULL);
+
+    babel_ifp->rtt_exponential_decay = decay;
+    return CMD_SUCCESS;
+}
+
+DEFUN (babel_set_rtt_min,
+       babel_set_rtt_min_cmd,
+       "babel rtt-min <1-65535>",
+       "Babel interface commands\n"
+       "Minimum RTT starting for increasing cost\n"
+       "Milliseconds")
+{
+    struct interface *ifp;
+    babel_interface_nfo *babel_ifp;
+    int rtt;
+
+    VTY_GET_INTEGER_RANGE("milliseconds", rtt, argv[0], 1, 65535);
+
+    ifp = vty->index;
+    babel_ifp = babel_get_if_nfo(ifp);
+    assert (babel_ifp != NULL);
+
+    babel_ifp->rtt_min = rtt;
+    return CMD_SUCCESS;
+}
+
+DEFUN (babel_set_rtt_max,
+       babel_set_rtt_max_cmd,
+       "babel rtt-max <1-65535>",
+       "Babel interface commands\n"
+       "Maximum RTT\n"
+       "Milliseconds")
+{
+    struct interface *ifp;
+    babel_interface_nfo *babel_ifp;
+    int rtt;
+
+    VTY_GET_INTEGER_RANGE("milliseconds", rtt, argv[0], 1, 65535);
+
+    ifp = vty->index;
+    babel_ifp = babel_get_if_nfo(ifp);
+    assert (babel_ifp != NULL);
+
+    babel_ifp->rtt_max = rtt;
+    return CMD_SUCCESS;
+}
+
+DEFUN (babel_set_max_rtt_penalty,
+       babel_set_max_rtt_penalty_cmd,
+       "babel max-rtt-penalty <0-65535>",
+       "Babel interface commands\n"
+       "Maximum additional cost due to RTT\n"
+       "Milliseconds")
+{
+    struct interface *ifp;
+    babel_interface_nfo *babel_ifp;
+    int penalty;
+
+    VTY_GET_INTEGER_RANGE("milliseconds", penalty, argv[0], 0, 65535);
+
+    ifp = vty->index;
+    babel_ifp = babel_get_if_nfo(ifp);
+    assert (babel_ifp != NULL);
+
+    babel_ifp->max_rtt_penalty = penalty;
+    return CMD_SUCCESS;
+}
+
 DEFUN (babel_set_channel,
        babel_set_channel_cmd,
        "babel channel <1-254>",
@@ -1283,6 +1367,10 @@ babel_if_init ()
     install_element(INTERFACE_NODE, &babel_set_update_interval_cmd);
     install_element(INTERFACE_NODE, &babel_set_rxcost_cmd);
     install_element(INTERFACE_NODE, &babel_set_channel_cmd);
+    install_element(INTERFACE_NODE, &babel_set_rtt_exponential_decay_cmd);
+    install_element(INTERFACE_NODE, &babel_set_rtt_min_cmd);
+    install_element(INTERFACE_NODE, &babel_set_rtt_max_cmd);
+    install_element(INTERFACE_NODE, &babel_set_max_rtt_penalty_cmd);
     install_element(INTERFACE_NODE, &babel_set_channel_interfering_cmd);
     install_element(INTERFACE_NODE, &babel_set_channel_noninterfering_cmd);
 
