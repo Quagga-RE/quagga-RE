@@ -572,6 +572,42 @@ DEFUN (babel_set_max_rtt_penalty,
     return CMD_SUCCESS;
 }
 
+DEFUN (babel_set_enable_timestamps,
+       babel_set_enable_timestamps_cmd,
+       "babel enable-timestamps",
+       "Babel interface commands\n"
+       "Enable timestamps\n"
+       "No attributes")
+{
+    struct interface *ifp;
+    babel_interface_nfo *babel_ifp;
+
+    ifp = vty->index;
+    babel_ifp = babel_get_if_nfo(ifp);
+    assert (babel_ifp != NULL);
+
+    babel_ifp->enable_timestamps = 1;
+    return CMD_SUCCESS;
+}
+
+DEFUN (no_babel_set_enable_timestamps,
+       no_babel_set_enable_timestamps_cmd,
+       "no babel enable-timestamps",
+       "Babel interface commands\n"
+       "Disable timestamps\n"
+       "No attributes")
+{
+    struct interface *ifp;
+    babel_interface_nfo *babel_ifp;
+
+    ifp = vty->index;
+    babel_ifp = babel_get_if_nfo(ifp);
+    assert (babel_ifp != NULL);
+
+    babel_ifp->enable_timestamps = 0;
+    return CMD_SUCCESS;
+}
+
 DEFUN (babel_set_channel,
        babel_set_channel_cmd,
        "babel channel <1-254>",
@@ -1371,6 +1407,8 @@ babel_if_init ()
     install_element(INTERFACE_NODE, &babel_set_rtt_min_cmd);
     install_element(INTERFACE_NODE, &babel_set_rtt_max_cmd);
     install_element(INTERFACE_NODE, &babel_set_max_rtt_penalty_cmd);
+    install_element(INTERFACE_NODE, &babel_set_enable_timestamps_cmd);
+    install_element(INTERFACE_NODE, &no_babel_set_enable_timestamps_cmd);
     install_element(INTERFACE_NODE, &babel_set_channel_interfering_cmd);
     install_element(INTERFACE_NODE, &babel_set_channel_noninterfering_cmd);
 
