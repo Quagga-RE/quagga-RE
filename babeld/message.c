@@ -572,7 +572,7 @@ parse_packet(const unsigned char *from, struct interface *ifp,
                    message[2] == 0 ? "any" : format_prefix(prefix, plen),
                    format_address(from), ifp->name);
             if(message[2] == 0) {
-                struct babel_interface *babel_ifp =babel_get_if_nfo(neigh->ifp);
+                struct babel_interface *neigh_ifp =babel_get_if_nfo(neigh->ifp);
                 /* If a neighbour is requesting a full route dump from us,
                    we might as well send it an IHU. */
                 send_ihu(neigh, NULL);
@@ -580,9 +580,9 @@ parse_packet(const unsigned char *from, struct interface *ifp,
                    a large number of nodes at the same time may cause an
                    update storm.  Ignore a wildcard request that happens
                    shortly after we sent a full update. */
-                if(babel_ifp->last_update_time <
+                if(neigh_ifp->last_update_time <
                    (time_t)(babel_now.tv_sec -
-                            MAX(babel_ifp->hello_interval / 100, 1)))
+                            MAX(neigh_ifp->hello_interval / 100, 1)))
                     send_update(neigh->ifp, 0, NULL, 0);
             } else {
                 send_update(neigh->ifp, 0, prefix, plen);
