@@ -586,7 +586,7 @@ Move up to previous line in the history buffer.
 @kindex @key{TAB}
 Use command line completion by typing @key{TAB}.
 
-@item
+@item ?
 @kindex ?
 You can use command line help by typing @code{help} at the beginning of
 the line.  Typing @kbd{?} at any point in the line will show possible
