@@ -51,6 +51,8 @@ struct babel_route {
     struct babel_route *next;
 };
 
+struct route_stream;
+
 extern struct babel_route **routes;
 extern int kernel_metric;
 extern int diversity_kind, diversity_factor;
@@ -84,8 +86,9 @@ void flush_route(struct babel_route *route);
 void flush_all_routes(void);
 void flush_neighbour_routes(struct neighbour *neigh);
 void flush_interface_routes(struct interface *ifp, int v4only);
-void for_all_routes(void (*f)(struct babel_route*, void*), void *closure);
-void for_all_installed_routes(void (*f)(struct babel_route*, void*), void *closure);
+struct route_stream *route_stream(int installed);
+struct babel_route *route_stream_next(struct route_stream *stream);
+void route_stream_done(struct route_stream *stream);
 void install_route(struct babel_route *route);
 void uninstall_route(struct babel_route *route);
 void switch_route(struct babel_route *old, struct babel_route *new);
