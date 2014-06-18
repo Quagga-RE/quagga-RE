@@ -1157,11 +1157,6 @@ ALIAS (show_babel_neighbour,
        "Print neighbors\n"
        "Interface name\n")
 
-struct show_babel_routes_closure {
-    struct vty *vty;
-    struct prefix *prefix;
-};
-
 static int
 babel_prefix_eq(struct prefix *prefix, unsigned char *p, int plen)
 {
@@ -1230,13 +1225,10 @@ show_babel_routes_sub(struct babel_route *route, struct vty *vty,
 }
 
 static void
-show_babel_xroutes_sub (struct xroute *xroute, void *closure)
+show_babel_xroutes_sub (struct xroute *xroute, struct vty *vty,
+                        struct prefix *prefix)
 {
-    struct show_babel_routes_closure *c =
-        (struct show_babel_routes_closure*)closure;
-    struct vty *vty = c->vty;
-
-    if(c->prefix && !babel_prefix_eq(c->prefix, xroute->prefix, xroute->plen))
+    if(prefix && !babel_prefix_eq(prefix, xroute->prefix, xroute->plen))
         return;
 
     vty_out(vty, "%s metric %d (exported)%s",
@@ -1252,8 +1244,8 @@ DEFUN (show_babel_route,
        "Babel information\n"
        "Babel internal routing table\n")
 {
-    struct show_babel_routes_closure c = {vty, NULL};
     struct route_stream *routes = NULL;
+    struct xroute_stream *xroutes = NULL;
     routes = route_stream(0);
     if(routes) {
         while(1) {
@@ -1266,7 +1258,18 @@ DEFUN (show_babel_route,
     } else {
         zlog_err("Couldn't allocate route stream.");
     }
-    for_all_xroutes(show_babel_xroutes_sub, &c);
+    xroutes = xroute_stream(0);
+    if(xroutes) {
+        while(1) {
+            struct xroute *xroute = xroute_stream_next(xroutes);
+            if(xroute == NULL)
+                break;
+            show_babel_xroutes_sub(xroute, vty, NULL);
+        }
+        xroute_stream_done(xroutes);
+    } else {
+        zlog_err("Couldn't allocate route stream.");
+    }
     return CMD_SUCCESS;
 }
 
@@ -1277,8 +1280,8 @@ DEFUN (show_babel_route_prefix,
        "Babel information\n"
        "IPv4 prefix <network>/<length>\n")
 {
-    struct show_babel_routes_closure c = {vty, NULL};
     struct route_stream *routes = NULL;
+    struct xroute_stream *xroutes = NULL;
     struct prefix prefix;
     int ret;
 
@@ -1287,7 +1290,6 @@ DEFUN (show_babel_route_prefix,
       vty_out (vty, "%% Malformed address%s", VTY_NEWLINE);
       return CMD_WARNING;
     }
-    c.prefix = &prefix;
         
     routes = route_stream(0);
     if(routes) {
@@ -1301,7 +1303,18 @@ DEFUN (show_babel_route_prefix,
     } else {
         zlog_err("Couldn't allocate route stream.");
     }
-    for_all_xroutes(show_babel_xroutes_sub, &c);
+    xroutes = xroute_stream(0);
+    if(xroutes) {
+        while(1) {
+            struct xroute *xroute = xroute_stream_next(xroutes);
+            if(xroute == NULL)
+                break;
+            show_babel_xroutes_sub(xroute, vty, &prefix);
+        }
+        xroute_stream_done(xroutes);
+    } else {
+        zlog_err("Couldn't allocate route stream.");
+    }
     return CMD_SUCCESS;
 }
 
@@ -1319,10 +1332,10 @@ DEFUN (show_babel_route_addr,
        "Babel information\n"
        "IPv4 address <network>/<length>\n")
 {
-    struct show_babel_routes_closure c = {vty, NULL};
     struct in_addr addr;
     char buf[INET_ADDRSTRLEN + 8];
     struct route_stream *routes = NULL;
+    struct xroute_stream *xroutes = NULL;
     struct prefix prefix;
     int ret;
 
@@ -1341,7 +1354,6 @@ DEFUN (show_babel_route_addr,
         return CMD_WARNING;
     }
 
-    c.prefix = &prefix;
     routes = route_stream(0);
     if(routes) {
         while(1) {
@@ -1354,7 +1366,18 @@ DEFUN (show_babel_route_addr,
     } else {
         zlog_err("Couldn't allocate route stream.");
     }
-    for_all_xroutes(show_babel_xroutes_sub, &c);
+    xroutes = xroute_stream(0);
+    if(xroutes) {
+        while(1) {
+            struct xroute *xroute = xroute_stream_next(xroutes);
+            if(xroute == NULL)
+                break;
+            show_babel_xroutes_sub(xroute, vty, &prefix);
+        }
+        xroute_stream_done(xroutes);
+    } else {
+        zlog_err("Couldn't allocate route stream.");
+    }
     return CMD_SUCCESS;
 }
 
@@ -1365,11 +1388,11 @@ DEFUN (show_babel_route_addr6,
        "Babel information\n"
        "IPv6 address <network>/<length>\n")
 {
-    struct show_babel_routes_closure c = {vty, NULL};
     struct in6_addr addr;
     char buf1[INET6_ADDRSTRLEN];
     char buf[INET6_ADDRSTRLEN + 8];
     struct route_stream *routes = NULL;
+    struct xroute_stream *xroutes = NULL;
     struct prefix prefix;
     int ret;
 
@@ -1389,7 +1412,6 @@ DEFUN (show_babel_route_addr6,
         return CMD_WARNING;
     }
 
-    c.prefix = &prefix;
     routes = route_stream(0);
     if(routes) {
         while(1) {
@@ -1402,7 +1424,18 @@ DEFUN (show_babel_route_addr6,
     } else {
         zlog_err("Couldn't allocate route stream.");
     }
-    for_all_xroutes(show_babel_xroutes_sub, &c);
+    xroutes = xroute_stream(0);
+    if(xroutes) {
+        while(1) {
+            struct xroute *xroute = xroute_stream_next(xroutes);
+            if(xroute == NULL)
+                break;
+            show_babel_xroutes_sub(xroute, vty, &prefix);
+        }
+        xroute_stream_done(xroutes);
+    } else {
+        zlog_err("Couldn't allocate route stream.");
+    }
     return CMD_SUCCESS;
 }
 
