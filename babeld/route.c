@@ -793,7 +793,7 @@ update_route(const unsigned char *router_id,
 
     if(martian_prefix(prefix, plen)) {
         zlog_err("Rejecting martian route to %s through %s.",
-                 format_prefix(prefix, plen), format_address(router_id));
+                 format_prefix(prefix, plen), format_address(nexthop));
         return NULL;
     }
 
@@ -832,9 +832,9 @@ update_route(const unsigned char *router_id,
             debugf(BABEL_DEBUG_COMMON,"Unfeasible update for installed route to %s "
                    "(%s %d %d -> %s %d %d).",
                    format_prefix(src->prefix, src->plen),
-                   format_address(route->src->id),
+                   format_eui64(route->src->id),
                    route->seqno, route->refmetric,
-                   format_address(src->id), seqno, refmetric);
+                   format_eui64(src->id), seqno, refmetric);
             if(src != route->src) {
                 uninstall_route(route);
                 lost = 1;
