@@ -143,12 +143,12 @@ parse_update_subtlv(const unsigned char *a, int alen,
         }
 
         if(i + 1 > alen) {
-            fprintf(stderr, "Received truncated attributes.\n");
+            zlog_err("Received truncated attributes.");
             return;
         }
         len = a[i + 1];
         if(i + len > alen) {
-            fprintf(stderr, "Received truncated attributes.\n");
+            zlog_err("Received truncated attributes.");
             return;
         }
 
@@ -156,20 +156,19 @@ parse_update_subtlv(const unsigned char *a, int alen,
             /* Nothing. */
         } else if(type == SUBTLV_DIVERSITY) {
             if(len > DIVERSITY_HOPS) {
-                fprintf(stderr,
-                        "Received overlong channel information (%d > %d).\n",
-                        len, DIVERSITY_HOPS);
+                zlog_err("Received overlong channel information (%d > %d).n",
+                         len, DIVERSITY_HOPS);
                 len = DIVERSITY_HOPS;
             }
             if(memchr(a + i + 2, 0, len) != NULL) {
                 /* 0 is reserved. */
-                fprintf(stderr, "Channel information contains 0!");
+                zlog_err("Channel information contains 0!");
                 return;
             }
             memset(channels, 0, DIVERSITY_HOPS);
             memcpy(channels, a + i + 2, len);
         } else {
-            fprintf(stderr, "Received unknown route attribute %d.\n", type);
+            zlog_err("Received unknown route attribute %d.", type);
         }
 
         i += len + 2;
@@ -189,12 +188,12 @@ parse_hello_subtlv(const unsigned char *a, int alen, struct neighbour *neigh)
         }
 
         if(i + 1 > alen) {
-            fprintf(stderr, "Received truncated sub-TLV on Hello message.\n");
+            zlog_err("Received truncated sub-TLV on Hello message.");
             return -1;
         }
         len = a[i + 1];
         if(i + len > alen) {
-            fprintf(stderr, "Received truncated sub-TLV on Hello message.\n");
+            zlog_err("Received truncated sub-TLV on Hello message.");
             return -1;
         }
 
@@ -206,11 +205,10 @@ parse_hello_subtlv(const unsigned char *a, int alen, struct neighbour *neigh)
                 neigh->hello_rtt_receive_time = babel_now;
                 ret = 1;
             } else {
-                fprintf(stderr,
-                        "Received incorrect RTT sub-TLV on Hello message.\n");
+                zlog_err("Received incorrect RTT sub-TLV on Hello message.");
             }
         } else {
-            fprintf(stderr, "Received unknown Hello sub-TLV type %d.\n", type);
+            zlog_err("Received unknown Hello sub-TLV type %d.", type);
         }
 
         i += len + 2;
@@ -233,12 +231,12 @@ parse_ihu_subtlv(const unsigned char *a, int alen,
         }
 
         if(i + 1 > alen) {
-            fprintf(stderr, "Received truncated sub-TLV on IHU message.\n");
+            zlog_err("Received truncated sub-TLV on IHU message.");
             return -1;
         }
         len = a[i + 1];
         if(i + len > alen) {
-            fprintf(stderr, "Received truncated sub-TLV on IHU message.\n");
+            zlog_err("Received truncated sub-TLV on IHU message.");
             return -1;
         }
 
@@ -251,11 +249,10 @@ parse_ihu_subtlv(const unsigned char *a, int alen,
                 ret = 1;
             }
             else {
-                fprintf(stderr,
-                        "Received incorrect RTT sub-TLV on IHU message.\n");
+                zlog_err("Received incorrect RTT sub-TLV on IHU message.");
             }
         } else {
-            fprintf(stderr, "Received unknown IHU sub-TLV type %d.\n", type);
+            zlog_err("Received unknown IHU sub-TLV type %d.", type);
         }
 
         i += len + 2;
@@ -705,9 +702,8 @@ fill_rtt_message(struct interface *ifp)
             DO_HTONL(babel_ifp->sendbuf + babel_ifp->buffered_hello + 10, time);
             return 1;
         } else {
-            fprintf(stderr,
-                    "No space left for timestamp sub-TLV "
-                    "(this shouldn't happen)\n");
+            zlog_err("No space left for timestamp sub-TLV "
+                     "(this shouldn't happen)");
             return -1;
         }
     }

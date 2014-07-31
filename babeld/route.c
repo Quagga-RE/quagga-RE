@@ -376,8 +376,8 @@ install_route(struct babel_route *route)
     assert(i >= 0 && i < route_slots);
 
     if(routes[i] != route && routes[i]->installed) {
-        fprintf(stderr, "WARNING: attempting to install duplicate route "
-                "(this shouldn't happen).");
+        zlog_err("WARNING: attempting to install duplicate route "
+                 "(this shouldn't happen).");
         return;
     }
 
@@ -553,7 +553,7 @@ route_interferes(struct babel_route *route, struct interface *ifp)
         }
         return 0;
     default:
-        fprintf(stderr, "Unknown kind of diversity.\n");
+        zlog_err("Unknown kind of diversity.");
         return 1;
     }
 }
@@ -872,7 +872,7 @@ update_route(const unsigned char *router_id,
         route->next = NULL;
         new_route = insert_route(route);
         if(new_route == NULL) {
-            fprintf(stderr, "Couldn't insert route.\n");
+            zlog_err("Couldn't insert route.");
             free(route);
             return NULL;
         }
