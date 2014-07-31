@@ -29,22 +29,9 @@ THE SOFTWARE.
 
 #define KERNEL_INFINITY 0xFFFF
 
-struct kernel_route {
-    unsigned char prefix[16];
-    int plen;
-    int metric;
-    unsigned int ifindex;
-    int proto;
-    unsigned char gw[16];
-};
-
 #define ROUTE_FLUSH 0
 #define ROUTE_ADD 1
 #define ROUTE_MODIFY 2
-
-#ifndef MAX_IMPORT_TABLES
-#define MAX_IMPORT_TABLES 10
-#endif
 
 int kernel_interface_operational(struct interface *interface);
 int kernel_interface_mtu(struct interface *interface);
